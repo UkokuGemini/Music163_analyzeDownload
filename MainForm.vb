@@ -127,12 +127,11 @@ Public Class MainForm
     Friend UpdateWebClient As New System.Net.WebClient
     Public Sub DownloadFiles(ByVal UrlStr As String, ByVal TargetPath As String)
         ToolStripProgressBar_Update.Value = 0
-        ToolStripStatusLabel_UpdatePer.Text = 0%
+        ToolStripStatusLabel_UpdatePer.Text = "0%[ / ]"
         UpdateWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath)
     End Sub '读取更新配置url
     Public Sub ConfigDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
         ToolStripProgressBar_Update.Value = 100
-        ToolStripStatusLabel_UpdatePer.Text = 100%
         LogText("ID=" & LastScanID & "的歌曲[" & FileNameStr & "] - 下载完成!")
         NextID()
     End Sub '下载完成->启动子
@@ -150,10 +149,10 @@ Public Class MainForm
         End If
     End Function
 #End Region
+    ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadFloders\"
 #Region "GetCode"
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
-    ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadFloders\"
     Public Structure MInfo
         Dim Name As String
         Dim ID As String
@@ -297,4 +296,26 @@ Public Class MainForm
         Return TempMInfo
     End Function
 #End Region
+    Private Sub 打开目录ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 打开目录ToolStripMenuItem.Click
+        Diagnostics.Process.Start(Directory.GetCurrentDirectory & "\")
+    End Sub
+    Private Sub 打开下载目录ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 打开下载目录ToolStripMenuItem.Click
+        Diagnostics.Process.Start(TargetPath)
+    End Sub
+    Private Sub 更改IDToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 更改IDToolStripMenuItem.Click
+        ScanDelayTimer.Enabled = False
+        Try
+            LastScanID = Convert.ToInt32(ToolStripTextBox_Changeid.Text)
+        Catch ex As Exception
+            ToolStripTextBox_Changeid.Text = ""
+        End Try
+        ScanDelayTimer.Enabled = True
+    End Sub
+    Private Sub TextBox_Log_TextChanged(sender As Object, e As EventArgs) Handles TextBox_Log.TextChanged
+        TextBox_Log.SelectionStart = TextBox_Log.TextLength
+        TextBox_Log.ScrollToCaret()
+    End Sub
+    Private Sub MainForm_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
+        ToolStripProgressBar_Update.Size = New Size(Me.Size.Width - 250, 20)
+    End Sub
 End Class
