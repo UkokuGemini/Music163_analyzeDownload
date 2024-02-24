@@ -120,7 +120,7 @@ Public Class MainForm
     Private Sub 设置下载文件夹位置ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置下载文件夹位置ToolStripMenuItem.Click
         If IO.File.Exists(TargetSetting) = False Then
             FolderBrowserDialog1.ShowDialog()
-            Dim FloderPath As String = FolderBrowserDialog1.SelectedPath
+            Dim FloderPath As String = FolderBrowserDialog1.SelectedPath & "\"
             If IO.Directory.Exists(FloderPath) = False Then
                 Try
                     IO.Directory.CreateDirectory(FloderPath)
