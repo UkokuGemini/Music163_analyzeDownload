@@ -364,6 +364,8 @@ FodyWeavers.xsd
 
 /bin/Release/*
 !/bin/Release/Music163_analyzeDownload.exe
+!/bin/Release/Newtonsoft.Json.dll
+!/bin/Release/System.Data.SQLite.dll
 
 *.cache
 /obj/Debug/PrivateSynBak.vbproj.AssemblyReference.cache
