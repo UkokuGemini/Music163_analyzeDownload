@@ -706,11 +706,12 @@ Public Class MainForm
             Dim JsonObjStr As JObject = CType(JsonConvert.DeserializeObject(UrlCode), JObject)
             Dim Jarr As JArray = JsonObjStr("result")("tracks")
             If Jarr.Count > 0 Then
-                Dim TempMinfo As New MInfo
                 For i = 0 To Jarr.Count - 1
-                    TempMinfo.code = "200"
-                    TempMinfo.ID = Jarr(i)("id").ToString
-                    TempMinfo.Name = Jarr(i)("name").ToString
+                    Dim TempMinfo As New MInfo With {
+                        .code = "200",
+                        .ID = Jarr(i)("id").ToString,
+                        .Name = Jarr(i)("name").ToString
+                    }
                     Dim ArtNum As Integer = Jarr(i)("artists").Count
                     If ArtNum > 0 Then
                         For ii = 0 To ArtNum - 1
