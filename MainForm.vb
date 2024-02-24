@@ -477,7 +477,7 @@ Public Class MainForm
     Private WithEvents GetRecommandIDTimer As New System.Windows.Forms.Timer
     Private Sub GetRecommandIDTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetRecommandIDTimer.Tick
         GetRecommandIDTimer.Enabled = False
-        If GetRecommandIDIndex < 4 Then ' Math.Min(GetRecommandIDIndexCount, StopFlag_GetRecommandIDTimer) Then
+        If GetRecommandIDIndex < Math.Min(GetRecommandIDIndexCount, StopFlag_GetRecommandIDTimer) Then
             If Delay_Flag Then
                 LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & RecommandNameArr(GetRecommandIDIndex) & "]" & "延迟等待:" & Int(GetRecommandIDTimer.Interval / 1000) & "s.", Not Delay_Flag)
             Else
