@@ -51,8 +51,8 @@ Public Class MainForm
         AddHandler ScanWebClient.DownloadFileCompleted, AddressOf ScanDownloadCompleted
         AddHandler RecommandWebClient.DownloadProgressChanged, AddressOf ShowRecommandDownProgress
         AddHandler RecommandWebClient.DownloadFileCompleted, AddressOf RecommandDownloadCompleted
-        AddHandler RecommandWebClient.DownloadProgressChanged, AddressOf ShowListDownProgress
-        AddHandler RecommandWebClient.DownloadFileCompleted, AddressOf ListDownloadCompleted
+        AddHandler ListWebClient.DownloadProgressChanged, AddressOf ShowListDownProgress
+        AddHandler ListWebClient.DownloadFileCompleted, AddressOf ListDownloadCompleted
         ScanDelayTimer.Interval = 1000
         FreshTimer.Interval = 60000
         GroupBox_Log.Text = "当前扫描ID:" & LastScanID
