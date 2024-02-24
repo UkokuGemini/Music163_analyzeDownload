@@ -14,13 +14,28 @@ Public Class MainForm
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
     ReadOnly ListUrl As String = "https://music.163.com/api/playlist/detail?id="
-    ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadFloders\"
-    ReadOnly IniPath As String = Directory.GetCurrentDirectory & "\ScanID.ini"
+    ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadDirs\"
+    ReadOnly IniPath As String = Directory.GetCurrentDirectory & "\ScanID.Ini"
     ReadOnly LogPath As String = Directory.GetCurrentDirectory & "\ScanLog.Log"
     ReadOnly ClockPath As String = Directory.GetCurrentDirectory & "\Clock.Ini"
+    ReadOnly TargetSetting As String = Directory.GetCurrentDirectory & "\MusicDir.Ini"
+    Dim DownLoadPath As String
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CenterToScreen()
         CheckAutoRecommand()
+        If IO.File.Exists(TargetSetting) Then
+            设置自动解析每日歌曲时间ToolStripMenuItem.Visible = False
+            Try
+                DownLoadPath = IO.File.ReadAllText(TargetSetting)
+            Catch ex As Exception
+                DownLoadPath = TargetPath
+            End Try
+        Else
+            DownLoadPath = TargetPath
+        End If
+        If IO.Directory.Exists(DownLoadPath) = False Then
+            IO.Directory.CreateDirectory(DownLoadPath)
+        End If '//下载文件夹设置
         Me.Text = My.Application.Info.ProductName.ToString & "[Ver." & My.Application.Info.Version.ToString & "]"
         If IO.File.Exists(IniPath) = False Then
             IO.File.WriteAllText(IniPath, 0)
@@ -72,11 +87,14 @@ Public Class MainForm
         End If
     End Sub
 #Region "Ui"
+    Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
+        Diagnostics.Process.Start("https://music.163.com/")
+    End Sub
     Private Sub 打开软件目录ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 打开软件目录ToolStripMenuItem.Click
         Diagnostics.Process.Start(Directory.GetCurrentDirectory & "\")
     End Sub
     Private Sub 打卡下载目录ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 打卡下载目录ToolStripMenuItem.Click
-        Diagnostics.Process.Start(TargetPath)
+        Diagnostics.Process.Start(DownLoadPath)
     End Sub
     Private Sub 退出XToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 退出XToolStripMenuItem.Click
         TrueClose = True
@@ -97,6 +115,23 @@ Public Class MainForm
         IO.File.WriteAllText(ClockPath, 7)
         Diagnostics.Process.Start(ClockPath)
         LogText("* 已建立自动解析每日歌曲时间,重启后生效.")
+    End Sub
+
+    Private Sub 设置下载文件夹位置ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置下载文件夹位置ToolStripMenuItem.Click
+        If IO.File.Exists(TargetSetting) = False Then
+            FolderBrowserDialog1.ShowDialog()
+            Dim FloderPath As String = FolderBrowserDialog1.SelectedPath
+            If IO.Directory.Exists(FloderPath) = False Then
+                Try
+                    IO.Directory.CreateDirectory(FloderPath)
+                Catch ex As Exception
+                    FloderPath = TargetPath
+                End Try
+            End If
+            IO.File.WriteAllText(TargetSetting, FloderPath)
+            DownLoadPath = FloderPath
+        End If
+        Diagnostics.Process.Start(TargetSetting)
     End Sub
     Private Sub CreateStartup()
         Dim WScript_T As Object = CreateObject("WScript.Shell")
@@ -211,13 +246,13 @@ Public Class MainForm
     Friend ScanWebClient As New System.Net.WebClient
     Friend RecommandWebClient As New System.Net.WebClient
     Friend ListWebClient As New System.Net.WebClient
-    Public Sub DownloadFiles(ByVal UrlStr As String, ByVal TargetPath As String, ByVal ScanDownloadType As Boolean)
+    Public Sub DownloadFiles(ByVal UrlStr As String, ByVal TargetPath_T As String, ByVal ScanDownloadType As Boolean)
         ToolStripProgressBar_Update.Value = 0
         ToolStripStatusLabel_UpdatePer.Text = "0%[ / ]"
         If ScanDownloadType Then
-            ScanWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath)
+            ScanWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath_T)
         Else
-            RecommandWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath)
+            RecommandWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath_T)
         End If
     End Sub '读取更新配置url
     Public Sub ScanDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
@@ -352,14 +387,14 @@ Public Class MainForm
                 NextID(ScanGetType)
             Else
                 LogText("正在下载ID=" & ID & "的歌曲信息.", False)
-                If IO.File.Exists(TargetPath & FileNameStr) Then
+                If IO.File.Exists(DownLoadPath & FileNameStr) Then
                     LogText("已存在ID=" & ID & "的歌曲[" & FileNameStr & "].")
                     NextID(ScanGetType)
                 Else
                     If ScanGetType = False Then
                         NowDownloadRecommandId = ID
                     End If
-                    DownloadFiles(FileUrl & ID, TargetPath & FileNameStr & ".Mp3", ScanGetType)
+                    DownloadFiles(FileUrl & ID, DownLoadPath & FileNameStr & ".Mp3", ScanGetType)
                 End If
             End If
         End If
@@ -713,7 +748,7 @@ Public Class MainForm
             NowDownloadListId = TempMInfo.ID
             ListFileNameStr = ReturnFileNameStr(TempMInfo)
             LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & ListArr.Count & ")", False)
-            ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), TargetPath & ListFileNameStr & ".Mp3")
+            ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
         Else
             StopFlag_DownloadListTimer = 0
             LogText(" - - 歌单(ID=" & ListId & ")下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.")
