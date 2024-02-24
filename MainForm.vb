@@ -606,7 +606,7 @@ Public Class MainForm
     Private Sub DownloadRecommandTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadRecommandTimer.Tick
         DownloadRecommandTimer.Enabled = False
         DownloadRecommandTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
-        If RecommandIDIndex < Math.Min(RecommandIDArr.Count - 1, StopFlag_DownloadRecommandTimer) Then
+        If RecommandIDIndex < Math.Min(RecommandIDArr.Count, StopFlag_DownloadRecommandTimer) Then
             Dim TempSearchInfo As SearchInfo = RecommandIDArr(RecommandIDIndex)
             If SuccessDownloadKey <> TempSearchInfo.Key OrElse (SuccessDownloadKey = "" AndAlso TempSearchInfo.Key = "") Then
                 NowDownloadKey = TempSearchInfo.Key
@@ -742,7 +742,7 @@ Public Class MainForm
     Private WithEvents DownloadListTimer As New System.Windows.Forms.Timer
     Private Sub DownloadListTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadListTimer.Tick
         DownloadListTimer.Enabled = False
-        If ListIDIndex < Math.Min(ListArr.Count - 1, StopFlag_DownloadListTimer) Then
+        If ListIDIndex < Math.Min(ListArr.Count, StopFlag_DownloadListTimer) Then
             DownloadListTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
             Dim TempMInfo As MInfo = ListArr(ListIDIndex)
             NowDownloadListId = TempMInfo.ID
@@ -751,7 +751,7 @@ Public Class MainForm
             ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
         Else
             StopFlag_DownloadListTimer = 0
-            LogText(" - - 歌单(ID=" & ListId & ")下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.")
+            LogText(" - - 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             ToolStripMenuItem_ScanButton.Enabled = True
             ToolStripSplitButton_Recommand.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
