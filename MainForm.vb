@@ -33,6 +33,7 @@ Public Class MainForm
         Else
             DownLoadPath = TargetPath
         End If
+        DownloadDirCheck()
         If IO.Directory.Exists(DownLoadPath) = False Then
             IO.Directory.CreateDirectory(DownLoadPath)
         End If '//下载文件夹设置
@@ -132,10 +133,13 @@ Public Class MainForm
         End If
         Diagnostics.Process.Start(TargetSetting)
     End Sub
-    Sub DownloadDirCheck(ByVal Path As String)
-        If IO.Directory.Exists(Path) = False Then
+    Sub DownloadDirCheck()
+        If Strings.Mid(DownLoadPath, DownLoadPath.Length, 1) <> "\" Then
+            DownLoadPath &= "\"
+        End If
+        If IO.Directory.Exists(DownLoadPath) = False Then
             Try
-                IO.Directory.CreateDirectory(Path)
+                IO.Directory.CreateDirectory(DownLoadPath)
             Catch ex As Exception
             End Try
         End If
@@ -158,7 +162,7 @@ Public Class MainForm
         'End If
     End Sub
     Private Sub 更改IDToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 更改IDToolStripMenuItem.Click
-        DownloadDirCheck(DownLoadPath)
+        DownloadDirCheck()
         ScanDelayTimer.Enabled = False
         Try
             LastScanID = Convert.ToInt32(ToolStripTextBox_Changeid.Text)
@@ -172,7 +176,7 @@ Public Class MainForm
     Private Sub ToolStripMenuItem_Scan_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem_ScanButton.Click
         ScanFlag = Not ScanFlag
         If ScanFlag Then
-            DownloadDirCheck(DownLoadPath)
+            DownloadDirCheck()
             ToolStripTextBox_Changeid.Text = ""
             ToolStripMenuItem_ScanButton.Text = "停止扫描"
             ScanDelayTimer.Enabled = True
@@ -184,7 +188,7 @@ Public Class MainForm
     Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Recommand.ButtonClick
         RecommandFlag = Not RecommandFlag
         If RecommandFlag Then
-            DownloadDirCheck(DownLoadPath)
+            DownloadDirCheck()
             ToolStripSplitButton_Recommand.Text = "停止解析每日歌单."
             If ScanFlag Then
                 ToolStripMenuItem_Scan_Click(Nothing, Nothing)
@@ -678,7 +682,7 @@ Public Class MainForm
     Private Sub ToolStripSplitButton1_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
         ListFlag = Not ListFlag
         If ListFlag Then
-            DownloadDirCheck(DownLoadPath)
+            DownloadDirCheck()
             ListId = ToolStripTextBox_ListId.Text
             ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
