@@ -116,7 +116,6 @@ Public Class MainForm
         Diagnostics.Process.Start(ClockPath)
         LogText("* 已建立自动解析每日歌曲时间,重启后生效.")
     End Sub
-
     Private Sub 设置下载文件夹位置ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置下载文件夹位置ToolStripMenuItem.Click
         If IO.File.Exists(TargetSetting) = False Then
             FolderBrowserDialog1.ShowDialog()
@@ -132,6 +131,14 @@ Public Class MainForm
             DownLoadPath = FloderPath
         End If
         Diagnostics.Process.Start(TargetSetting)
+    End Sub
+    Sub DownloadDirCheck(ByVal Path As String)
+        If IO.Directory.Exists(Path) = False Then
+            Try
+                IO.Directory.CreateDirectory(Path)
+            Catch ex As Exception
+            End Try
+        End If
     End Sub
     Private Sub CreateStartup()
         Dim WScript_T As Object = CreateObject("WScript.Shell")
@@ -151,6 +158,7 @@ Public Class MainForm
         'End If
     End Sub
     Private Sub 更改IDToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 更改IDToolStripMenuItem.Click
+        DownloadDirCheck(DownLoadPath)
         ScanDelayTimer.Enabled = False
         Try
             LastScanID = Convert.ToInt32(ToolStripTextBox_Changeid.Text)
@@ -164,6 +172,7 @@ Public Class MainForm
     Private Sub ToolStripMenuItem_Scan_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem_ScanButton.Click
         ScanFlag = Not ScanFlag
         If ScanFlag Then
+            DownloadDirCheck(DownLoadPath)
             ToolStripTextBox_Changeid.Text = ""
             ToolStripMenuItem_ScanButton.Text = "停止扫描"
             ScanDelayTimer.Enabled = True
@@ -175,6 +184,7 @@ Public Class MainForm
     Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Recommand.ButtonClick
         RecommandFlag = Not RecommandFlag
         If RecommandFlag Then
+            DownloadDirCheck(DownLoadPath)
             ToolStripSplitButton_Recommand.Text = "停止解析每日歌单."
             If ScanFlag Then
                 ToolStripMenuItem_Scan_Click(Nothing, Nothing)
@@ -634,7 +644,7 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "定时"
-    Dim ClockTime As Integer
+    Dim ClockTime As Integer = -1
     Dim FreshDate As Date
     Private WithEvents FreshTimer As New System.Windows.Forms.Timer
     Sub CheckAutoRecommand()
@@ -645,6 +655,7 @@ Public Class MainForm
             Catch ex As Exception
                 ClockTime = 7
             End Try
+            FreshTimer.Enabled = True
             LogText("*已开启自动下载每日歌曲.@" & ClockTime & ":00")
         Else
             设置自动解析每日歌曲时间ToolStripMenuItem.Visible = True
@@ -667,6 +678,7 @@ Public Class MainForm
     Private Sub ToolStripSplitButton1_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
         ListFlag = Not ListFlag
         If ListFlag Then
+            DownloadDirCheck(DownLoadPath)
             ListId = ToolStripTextBox_ListId.Text
             ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
