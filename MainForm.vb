@@ -573,7 +573,11 @@ Public Class MainForm
         Dim SearchUrl As String = "https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=" & SearchKey & "&type=1&offset=0&total=true&limit=5"
         Dim UrlCode As String = GetWebCode(SearchUrl)
         Dim JsonObj_Code As New With {.code = ""}
-        JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+        Try
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+        Catch ex As Exception
+            JsonObj_Code.code = "-1"
+        End Try
         Delay_Flag = False
         If JsonObj_Code.code = "200" Then
             Dim JsonObj_res As JObject = CType(JsonConvert.DeserializeObject(UrlCode), JObject)
