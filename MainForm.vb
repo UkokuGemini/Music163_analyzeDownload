@@ -136,6 +136,7 @@ Public Class MainForm
         ScanFlag = Not ScanFlag
         If ScanFlag Then
             DownloadDirCheck()
+            ScanIndex = 0
             ToolStripTextBox_Changeid.Text = ""
             ToolStripMenuItem_ScanButton.Text = "停止扫描"
             ScanDelayTimer.Enabled = True
@@ -237,6 +238,7 @@ Public Class MainForm
         ToolStripProgressBar_Update.Value = 0
         ToolStripStatusLabel_UpdatePer.Text = "0%[ / ]"
         If ScanDownloadType Then
+            ScanIndex += 1
             ScanWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath_T)
         Else
             RecommandWebClient.DownloadFileAsync(New Uri(UrlStr), TargetPath_T)
@@ -360,6 +362,8 @@ Public Class MainForm
     Dim FileNameStr, ListFileNameStr As String
     Dim ScanFlag As Boolean = False
     Dim RecommandFlag As Boolean = False
+    Dim ScanIndex As Integer = 0
+    Dim ScanMax As String
     Sub GetPageInfo(ByVal ID As String, ByVal ScanGetType As Boolean)
         Dim UrlCode As String = GetWebCode(WebUrl & ID)
         If InStr(UrlCode, "很抱歉，你要查找的网页找不到") > 0 Then
@@ -446,7 +450,11 @@ Public Class MainForm
     Private Sub ScanDelayTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ScanDelayTimer.Tick
         ScanDelayTimer.Enabled = False
         ScanDelayTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
-        GetPageInfo(ScanID, True)
+        If ScanIndex >= Int(ScanMax) Then
+            ToolStripMenuItem_Scan_Click(Nothing, Nothing)
+        Else
+            GetPageInfo(ScanID, True)
+        End If
     End Sub
 #End Region
 #Region "每日歌曲"
@@ -792,6 +800,7 @@ Public Class MainForm
 "<ScanId>0</ScanId>" & vbCrLf &
 "<AppId></AppId>" & vbCrLf &
 "<accessToken></accessToken>" & vbCrLf &
+"<ScanMax>1000</ScanMax>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
         If IO.File.Exists(XmlSettingPath) = False Then
@@ -802,6 +811,7 @@ Public Class MainForm
         AutoClock = ReadXmlKeyValue("AutoClock", 7)
         Api_appId = ReadXmlKeyValue("AppId", "")
         Api_accessToken = ReadXmlKeyValue("accessToken", "")
+        ScanMax = ReadXmlKeyValue("ScanMax", "1000")
     End Sub
     Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
         Dim Res As String = DefaultValue
