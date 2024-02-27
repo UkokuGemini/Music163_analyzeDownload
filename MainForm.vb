@@ -10,42 +10,23 @@ Imports System.Security.AccessControl
 Imports System.Net.WebRequestMethods
 
 Public Class MainForm
-    Dim LastScanID As Integer = 0
+    Dim ScanID As Integer = 0
+    Dim AutoClock As Integer = -1
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
     ReadOnly ListUrl As String = "https://music.163.com/api/playlist/detail?id="
     ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadDirs\"
-    ReadOnly IniPath As String = Directory.GetCurrentDirectory & "\ScanID.Ini"
     ReadOnly LogPath As String = Directory.GetCurrentDirectory & "\ScanLog.Log"
-    ReadOnly ClockPath As String = Directory.GetCurrentDirectory & "\Clock.Ini"
-    ReadOnly TargetSetting As String = Directory.GetCurrentDirectory & "\MusicDir.Ini"
+    ReadOnly XmlSettingPath As String = Directory.GetCurrentDirectory & "\Music163_analyzeDownload_Setting.Xml"
     Dim DownLoadPath As String
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CenterToScreen()
-        CheckAutoRecommand()
-        If IO.File.Exists(TargetSetting) Then
-            设置自动解析每日歌曲时间ToolStripMenuItem.Visible = False
-            Try
-                DownLoadPath = IO.File.ReadAllText(TargetSetting)
-            Catch ex As Exception
-                DownLoadPath = TargetPath
-            End Try
-        Else
-            DownLoadPath = TargetPath
-        End If
-        DownloadDirCheck()
-        If IO.Directory.Exists(DownLoadPath) = False Then
-            IO.Directory.CreateDirectory(DownLoadPath)
-        End If '//下载文件夹设置
+        LogText(Format(Now, "yyyy-MM-dd HH:mm >>"))
+        ReadXmlSetting() '//读出设置数据
+        CheckAutoRecommand() 'AutoClock
+        DownloadDirCheck() 'DownloadDir
+        LogText("*当前下载文件夹位置:" & DownLoadPath)
         Me.Text = My.Application.Info.ProductName.ToString & "[Ver." & My.Application.Info.Version.ToString & "]"
-        If IO.File.Exists(IniPath) = False Then
-            IO.File.WriteAllText(IniPath, 0)
-        Else
-            Try
-                LastScanID = IO.File.ReadAllText(IniPath)
-            Catch ex As Exception
-            End Try
-        End If
         ScanWebClient = New WebClient
         RecommandWebClient = New WebClient
         AddHandler ScanWebClient.DownloadProgressChanged, AddressOf ShowScanDownProgress
@@ -56,29 +37,13 @@ Public Class MainForm
         AddHandler ListWebClient.DownloadFileCompleted, AddressOf ListDownloadCompleted
         ScanDelayTimer.Interval = 1000
         FreshTimer.Interval = 60000
-        GroupBox_Log.Text = "当前扫描ID:" & LastScanID
+        GroupBox_Log.Text = "当前扫描ID:" & ScanID
         ToolStripStatusLabel_St.Text = ""
-#Region "SQL暂不使用"
-        'DataBaseConnection.ConnectionString = "Data Source=" & DataBasePath
-        'SysDB = SQLDataBaseQeury("SELECT * From Sys", DataBaseConnection)
-        'MInfoDB = SQLDataBaseQeury("SELECT * From MInfo", DataBaseConnection)
-        'Try
-        '    LastScanID = Convert.ToInt32(SysDB.Tables(0).Rows(0).Item("LastScanID"))
-        'Catch ex As Exception
-        '    LastScanID = 0
-        'End Try
-        'For i = 0 To MInfoDB.Tables(0).Rows.Count - 1
-        '    If MInfoDB.Tables(0).Rows(i).Item("DownloadFlag") = False Then
-        '        TryDownloadArr.Add(MInfoDB.Tables(0).Rows(i).Item("ID"))
-        '    End If
-        'Next
-
-#End Region
     End Sub
     Dim TrueClose As Boolean = False
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         If TrueClose Then
-            IO.File.WriteAllText(IniPath, LastScanID)
+            WriteXml("ScanId", ScanID)
             IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  - -  " & Format(Now, "yyyy-MM-dd HH:mm"))
             NotifyIcon1.Dispose()
         Else
@@ -111,27 +76,21 @@ Public Class MainForm
             MsgBox("设置失败.")
         End Try
     End Sub
-    Private Sub 设置自动解析每日歌曲时间ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置自动解析每日歌曲时间ToolStripMenuItem.Click
-        设置自动解析每日歌曲时间ToolStripMenuItem.Visible = False
-        IO.File.WriteAllText(ClockPath, 7)
-        Diagnostics.Process.Start(ClockPath)
-        LogText("* 已建立自动解析每日歌曲时间,重启后生效.")
+    Private Sub 设置文件配置ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置文件配置ToolStripMenuItem.Click
+        Diagnostics.Process.Start(XmlSettingPath)
     End Sub
-    Private Sub 设置下载文件夹位置ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 设置下载文件夹位置ToolStripMenuItem.Click
-        If IO.File.Exists(TargetSetting) = False Then
-            FolderBrowserDialog1.ShowDialog()
-            Dim FloderPath As String = FolderBrowserDialog1.SelectedPath & "\"
-            If IO.Directory.Exists(FloderPath) = False Then
-                Try
-                    IO.Directory.CreateDirectory(FloderPath)
-                Catch ex As Exception
-                    FloderPath = TargetPath
-                End Try
-            End If
-            IO.File.WriteAllText(TargetSetting, FloderPath)
-            DownLoadPath = FloderPath
+    Private Sub 选择下载文件夹ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 选择下载文件夹ToolStripMenuItem.Click
+        FolderBrowserDialog1.ShowDialog()
+        Dim FloderPath As String = FolderBrowserDialog1.SelectedPath & "\"
+        If IO.Directory.Exists(FloderPath) = False Then
+            Try
+                IO.Directory.CreateDirectory(FloderPath)
+            Catch ex As Exception
+                FloderPath = TargetPath
+            End Try
         End If
-        Diagnostics.Process.Start(TargetSetting)
+        DownLoadPath = FloderPath
+        WriteXml("DownloadDir", DownLoadPath)
     End Sub
     Sub DownloadDirCheck()
         If Strings.Mid(DownLoadPath, DownLoadPath.Length, 1) <> "\" Then
@@ -165,7 +124,7 @@ Public Class MainForm
         DownloadDirCheck()
         ScanDelayTimer.Enabled = False
         Try
-            LastScanID = Convert.ToInt32(ToolStripTextBox_Changeid.Text)
+            ScanID = Convert.ToInt32(ToolStripTextBox_Changeid.Text)
         Catch ex As Exception
             ToolStripTextBox_Changeid.Text = ""
         End Try
@@ -186,6 +145,20 @@ Public Class MainForm
     End Sub
     Dim StopFlag_GetRecommandIDTimer, StopFlag_DownloadRecommandTimer, StopFlag_DownloadListTimer As Integer
     Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Recommand.ButtonClick
+        Try
+            Api_appId = ReadXmlKeyValue("AppId", "")
+            Api_accessToken = ReadXmlKeyValue("accessToken", "")
+        Catch ex As Exception
+        End Try
+        If Api_appId <> "" AndAlso Api_accessToken <> "" Then
+            GoDaily()
+        Else
+            If MsgBox("需要自助填写AppId 和 accessToken！" & vbCrLf & "是否开启获取界面'https://developer.music.163.com/st/developer/document?category=sandbox'?", MsgBoxStyle.YesNo, "缺少必要项目.") = vbYes Then
+                Diagnostics.Process.Start("https://developer.music.163.com/st/developer/document?category=sandbox")
+            End If
+        End If
+    End Sub
+    Sub GoDaily()
         RecommandFlag = Not RecommandFlag
         If RecommandFlag Then
             DownloadDirCheck()
@@ -271,7 +244,7 @@ Public Class MainForm
     End Sub '读取更新配置url
     Public Sub ScanDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
         ToolStripProgressBar_Update.Value = 100
-        LogText("ID=" & LastScanID & "的歌曲[" & FileNameStr & "] - 下载完成!")
+        LogText("ID=" & ScanID & "的歌曲[" & FileNameStr & "] - 下载完成!")
         NextID(True)
     End Sub '下载完成->启动子
     Private Sub ShowScanDownProgress(ByVal sender As Object, ByVal e As System.Net.DownloadProgressChangedEventArgs)
@@ -425,8 +398,8 @@ Public Class MainForm
     End Function
     Sub NextID(ByVal ScanType As Boolean)
         If ScanType Then
-            LastScanID += 1
-            GroupBox_Log.Text = "当前扫描ID:" & LastScanID
+            ScanID += 1
+            GroupBox_Log.Text = "当前扫描ID:" & ScanID
             If ScanFlag Then
                 ScanDelayTimer.Enabled = True
             End If
@@ -473,20 +446,27 @@ Public Class MainForm
     Private Sub ScanDelayTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ScanDelayTimer.Tick
         ScanDelayTimer.Enabled = False
         ScanDelayTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
-        GetPageInfo(LastScanID, True)
+        GetPageInfo(ScanID, True)
     End Sub
 #End Region
 #Region "每日歌曲"
-    ReadOnly Api_Recommand As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
+    ReadOnly Api_Recommand As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=<*>&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=<*>&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
     Dim RecommandNameArr As New ArrayList
     Dim RecommandIDArr As New ArrayList
     Dim ListArr As New ArrayList
+    Dim Api_appId As String
+    Dim Api_accessToken As String
+    Function CombApiUrl(ByVal Appid_Default As String, ByVal accessToken_Default As String) As String
+        Appid_Default = "a301010000000000aadb4e5a28b45a67"
+        accessToken_Default = "x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y"
+        Return Replace(Replace(Api_Recommand, "appId=<*>", "appId=" & Appid_Default), "accessToken=<*>", "accessToken=" & accessToken_Default)
+    End Function
     Sub GetRecommand()
         SuccessDownloadKey = ""
         NowDownloadKey = ""
         RecommandNameArr.Clear()
         RecommandIDArr.Clear()
-        Dim Api_Recommand_Now As String = Api_Recommand & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
+        Dim Api_Recommand_Now As String = CombApiUrl(Api_appId, Api_accessToken) & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
         Dim UrlCode As String = GetWebCode(Api_Recommand_Now)
         Dim JsonObj_Code As New With {.code = ""}
         Try
@@ -515,12 +495,38 @@ Public Class MainForm
                 StopFlag_GetRecommandIDTimer = GetRecommandIDIndexCount
                 GetRecommandIDTimer.Enabled = True
             Else
+                ToolStripSplitButton_Recommand.Text = "解析并下载每日歌单."
+                RecommandFlag = False
                 RecommandStep = 0
+                RecommandIDArr.Clear()
+                ToolStripSplitButton_Recommand.Enabled = True
+                ToolStripMenuItem_ScanButton.Enabled = True
+                更改IDToolStripMenuItem.Enabled = True
+                ToolStripSplitButton1.Enabled = True
+                If OnContinueScan Then
+                    OnContinueScan = False
+                    ToolStripMenuItem_ScanButton.Text = "停止扫描"
+                    ScanDelayTimer.Enabled = True
+                    ScanFlag = True
+                End If
                 LogText("未获取到今日歌单.")
             End If
         Else
+            ToolStripSplitButton_Recommand.Text = "解析并下载每日歌单."
+            RecommandFlag = False
             RecommandStep = 0
-            LogText("今日歌单获取失败.")
+            RecommandIDArr.Clear()
+            ToolStripSplitButton_Recommand.Enabled = True
+            ToolStripMenuItem_ScanButton.Enabled = True
+            更改IDToolStripMenuItem.Enabled = True
+            ToolStripSplitButton1.Enabled = True
+            If OnContinueScan Then
+                OnContinueScan = False
+                ToolStripMenuItem_ScanButton.Text = "停止扫描"
+                ScanDelayTimer.Enabled = True
+                ScanFlag = True
+            End If
+            LogText("今日歌单获取失败." & JsonObj_Code.code)
         End If
     End Sub
     Private WithEvents GetRecommandIDTimer As New System.Windows.Forms.Timer
@@ -652,28 +658,20 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "定时"
-    Dim ClockTime As Integer = -1
     Dim FreshDate As Date
     Private WithEvents FreshTimer As New System.Windows.Forms.Timer
     Sub CheckAutoRecommand()
-        If IO.File.Exists(ClockPath) Then
-            设置自动解析每日歌曲时间ToolStripMenuItem.Visible = False
-            Try
-                ClockTime = Math.Max(Math.Min(23, Convert.ToInt32(IO.File.ReadAllText(ClockPath))), 0)
-            Catch ex As Exception
-                ClockTime = 7
-            End Try
+        If AutoClock > -1 AndAlso AutoClock < 24 Then
             FreshTimer.Enabled = True
-            LogText("*已开启自动下载每日歌曲.@" & ClockTime & ":00")
+            LogText("*已开启自动下载每日歌曲.@" & AutoClock & ":00")
         Else
-            设置自动解析每日歌曲时间ToolStripMenuItem.Visible = True
-            ClockTime = -1
+            AutoClock = -1
             LogText("*未开启自动下载每日歌曲.")
         End If
     End Sub
     Private Sub FreshTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FreshTimer.Tick
-        If ClockTime > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = ClockTime AndAlso Now.Date > FreshDate.Date Then
-            FreshDate = Now.Date
+        If AutoClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoClock AndAlso Now.Date > FreshDate.Date Then
+            FreshDate = Now.Date '//防止不断触发
             If RecommandFlag = False Then
                 ToolStripSplitButton_Recommand_ButtonClick(Nothing, Nothing)
             End If
@@ -783,6 +781,75 @@ Public Class MainForm
                 ScanDelayTimer.Enabled = True
                 ScanFlag = True
             End If
+        End If
+    End Sub
+#End Region
+#Region "XmlSetting"
+    ReadOnly InitialXmlSettingStr As String = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf &
+"<Music163_analyzeDownload_Setting> " & vbCrLf &
+"<AutoClock>7</AutoClock>" & vbCrLf &
+"<DownloadDir>" & TargetPath & "</DownloadDir>" & vbCrLf &
+"<ScanId>0</ScanId>" & vbCrLf &
+"<AppId></AppId>" & vbCrLf &
+"<accessToken></accessToken>" & vbCrLf &
+"</Music163_analyzeDownload_Setting>"
+    Sub ReadXmlSetting()
+        If IO.File.Exists(XmlSettingPath) = False Then
+            IO.File.WriteAllText(XmlSettingPath, InitialXmlSettingStr)
+        End If
+        ScanID = ReadXmlKeyValue("ScanId", 0)
+        DownLoadPath = ReadXmlKeyValue("DownloadDir", TargetPath)
+        AutoClock = ReadXmlKeyValue("AutoClock", 7)
+        Api_appId = ReadXmlKeyValue("AppId", "")
+        Api_accessToken = ReadXmlKeyValue("accessToken", "")
+    End Sub
+    Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
+        Dim Res As String = DefaultValue
+        Try
+            Dim xmlDoc As New XmlDocument()
+            xmlDoc.Load(XmlSettingPath)
+            Res = CType(xmlDoc.SelectSingleNode("Music163_analyzeDownload_Setting").SelectSingleNode(QurStr), XmlElement).InnerText
+        Catch ex As Exception
+        End Try
+        Return Res
+    End Function
+    Sub WriteXml(ByVal NameStr As String, ByVal Value As String)
+        Dim SuccesFlag As Boolean = False
+        Dim xmlDoc As New XmlDocument()
+        xmlDoc.Load(XmlSettingPath)
+        Dim RootNode As XmlElement = xmlDoc.DocumentElement
+        Dim isExit As Boolean = False
+        If IsNothing(RootNode) = False Then
+            Try
+                Dim mBound, i As Integer
+                '循环体遍历子节点
+                mBound = RootNode.ChildNodes.Count - 1
+                For i = 0 To mBound
+                    If RootNode.ChildNodes(i).Name = NameStr Then
+                        RootNode.ChildNodes(i).InnerText = Value
+                        SuccesFlag = True
+                        isExit = True
+                        Exit For
+                    End If
+                Next
+            Catch ex As Exception
+            End Try
+        End If
+        Try
+            '如果修改失败，则创建节点
+            If isExit = False Then
+                Dim xn As XmlNode = xmlDoc.CreateNode(XmlNodeType.Element, NameStr, "")
+                RootNode.AppendChild(xn)
+                xn.InnerText = Value
+            End If
+        Catch ex As Exception
+            SuccesFlag = False    '如果XML文件遭到破坏，则返回False
+        End Try
+        If SuccesFlag Then
+            xmlDoc.Save(XmlSettingPath)
+            LogText("已更改下载文件夹:" & Value)
+        Else
+            LogText("下载文件夹:" & Value & "修改失败,请在配置文件中手动修改.")
         End If
     End Sub
 #End Region

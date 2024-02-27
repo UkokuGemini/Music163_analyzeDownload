@@ -32,12 +32,15 @@ Partial Class MainForm
         Me.打卡下载目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.退出XToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.设置开机启动ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.设置自动解析每日歌曲时间ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
+        Me.设置文件配置ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.选择下载文件夹ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TextBox_Log = New System.Windows.Forms.TextBox()
         Me.GroupBox_Log = New System.Windows.Forms.GroupBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.ToolStripProgressBar_Update = New System.Windows.Forms.ToolStripProgressBar()
         Me.ToolStripStatusLabel_UpdatePer = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.ToolStripStatusLabel1 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.NotifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
         Me.ToolStrip1 = New System.Windows.Forms.ToolStrip()
         Me.ToolStripMenuItem_ScanButton = New System.Windows.Forms.ToolStripMenuItem()
@@ -50,10 +53,7 @@ Partial Class MainForm
         Me.ToolStripTextBox_ListId = New System.Windows.Forms.ToolStripTextBox()
         Me.ToolStripSplitButton1 = New System.Windows.Forms.ToolStripSplitButton()
         Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.设置下载文件夹位置ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
-        Me.ToolStripStatusLabel1 = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.StatusStrip_St.SuspendLayout()
         Me.MenuStrip_Menu.SuspendLayout()
         Me.GroupBox_Log.SuspendLayout()
@@ -83,7 +83,7 @@ Partial Class MainForm
         Me.MenuStrip_Menu.BackColor = System.Drawing.SystemColors.Control
         Me.MenuStrip_Menu.GripMargin = New System.Windows.Forms.Padding(2, 2, 0, 2)
         Me.MenuStrip_Menu.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.退出XToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.设置自动解析每日歌曲时间ToolStripMenuItem, Me.设置下载文件夹位置ToolStripMenuItem, Me.ToolStripButton1})
+        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.退出XToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.ToolStripButton1, Me.设置文件配置ToolStripMenuItem, Me.选择下载文件夹ToolStripMenuItem})
         Me.MenuStrip_Menu.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip_Menu.Name = "MenuStrip_Menu"
         Me.MenuStrip_Menu.Size = New System.Drawing.Size(1166, 37)
@@ -100,13 +100,13 @@ Partial Class MainForm
         '打开软件目录ToolStripMenuItem
         '
         Me.打开软件目录ToolStripMenuItem.Name = "打开软件目录ToolStripMenuItem"
-        Me.打开软件目录ToolStripMenuItem.Size = New System.Drawing.Size(270, 34)
+        Me.打开软件目录ToolStripMenuItem.Size = New System.Drawing.Size(218, 34)
         Me.打开软件目录ToolStripMenuItem.Text = "打开软件目录"
         '
         '打卡下载目录ToolStripMenuItem
         '
         Me.打卡下载目录ToolStripMenuItem.Name = "打卡下载目录ToolStripMenuItem"
-        Me.打卡下载目录ToolStripMenuItem.Size = New System.Drawing.Size(270, 34)
+        Me.打卡下载目录ToolStripMenuItem.Size = New System.Drawing.Size(218, 34)
         Me.打卡下载目录ToolStripMenuItem.Text = "打开下载目录"
         '
         '退出XToolStripMenuItem
@@ -121,11 +121,27 @@ Partial Class MainForm
         Me.设置开机启动ToolStripMenuItem.Size = New System.Drawing.Size(134, 33)
         Me.设置开机启动ToolStripMenuItem.Text = "设置开机启动"
         '
-        '设置自动解析每日歌曲时间ToolStripMenuItem
+        'ToolStripButton1
         '
-        Me.设置自动解析每日歌曲时间ToolStripMenuItem.Name = "设置自动解析每日歌曲时间ToolStripMenuItem"
-        Me.设置自动解析每日歌曲时间ToolStripMenuItem.Size = New System.Drawing.Size(242, 33)
-        Me.设置自动解析每日歌曲时间ToolStripMenuItem.Text = "设置自动解析每日歌曲时间"
+        Me.ToolStripButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+        Me.ToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.ToolStripButton1.Image = CType(resources.GetObject("ToolStripButton1.Image"), System.Drawing.Image)
+        Me.ToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripButton1.Name = "ToolStripButton1"
+        Me.ToolStripButton1.Size = New System.Drawing.Size(34, 28)
+        Me.ToolStripButton1.Text = "ToolStripButton1"
+        '
+        '设置文件配置ToolStripMenuItem
+        '
+        Me.设置文件配置ToolStripMenuItem.Name = "设置文件配置ToolStripMenuItem"
+        Me.设置文件配置ToolStripMenuItem.Size = New System.Drawing.Size(134, 33)
+        Me.设置文件配置ToolStripMenuItem.Text = "设置文件配置"
+        '
+        '选择下载文件夹ToolStripMenuItem
+        '
+        Me.选择下载文件夹ToolStripMenuItem.Name = "选择下载文件夹ToolStripMenuItem"
+        Me.选择下载文件夹ToolStripMenuItem.Size = New System.Drawing.Size(152, 33)
+        Me.选择下载文件夹ToolStripMenuItem.Text = "选择下载文件夹"
         '
         'TextBox_Log
         '
@@ -172,6 +188,13 @@ Partial Class MainForm
         Me.ToolStripStatusLabel_UpdatePer.Name = "ToolStripStatusLabel_UpdatePer"
         Me.ToolStripStatusLabel_UpdatePer.Size = New System.Drawing.Size(26, 23)
         Me.ToolStripStatusLabel_UpdatePer.Text = "%"
+        '
+        'ToolStripStatusLabel1
+        '
+        Me.ToolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.ToolStripStatusLabel1.Name = "ToolStripStatusLabel1"
+        Me.ToolStripStatusLabel1.Size = New System.Drawing.Size(0, 23)
+        Me.ToolStripStatusLabel1.Text = "ToolStripStatusLabel1"
         '
         'NotifyIcon1
         '
@@ -264,29 +287,6 @@ Partial Class MainForm
         Me.Panel1.Size = New System.Drawing.Size(1166, 32)
         Me.Panel1.TabIndex = 10
         '
-        '设置下载文件夹位置ToolStripMenuItem
-        '
-        Me.设置下载文件夹位置ToolStripMenuItem.Name = "设置下载文件夹位置ToolStripMenuItem"
-        Me.设置下载文件夹位置ToolStripMenuItem.Size = New System.Drawing.Size(188, 33)
-        Me.设置下载文件夹位置ToolStripMenuItem.Text = "设置下载文件夹位置"
-        '
-        'ToolStripStatusLabel1
-        '
-        Me.ToolStripStatusLabel1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        Me.ToolStripStatusLabel1.Name = "ToolStripStatusLabel1"
-        Me.ToolStripStatusLabel1.Size = New System.Drawing.Size(0, 23)
-        Me.ToolStripStatusLabel1.Text = "ToolStripStatusLabel1"
-        '
-        'ToolStripButton1
-        '
-        Me.ToolStripButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
-        Me.ToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
-        Me.ToolStripButton1.Image = CType(resources.GetObject("ToolStripButton1.Image"), System.Drawing.Image)
-        Me.ToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.ToolStripButton1.Name = "ToolStripButton1"
-        Me.ToolStripButton1.Size = New System.Drawing.Size(34, 28)
-        Me.ToolStripButton1.Text = "ToolStripButton1"
-        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(9.0!, 18.0!)
@@ -340,11 +340,11 @@ Partial Class MainForm
     Friend WithEvents ToolStripMenuItem_ScanButton As ToolStripMenuItem
     Friend WithEvents ToolStripSplitButton_Recommand As ToolStripSplitButton
     Friend WithEvents Panel1 As Panel
-    Friend WithEvents 设置自动解析每日歌曲时间ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripTextBox_ListId As ToolStripTextBox
     Friend WithEvents ToolStripSplitButton1 As ToolStripSplitButton
-    Friend WithEvents 设置下载文件夹位置ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents FolderBrowserDialog1 As FolderBrowserDialog
     Friend WithEvents ToolStripButton1 As ToolStripButton
     Friend WithEvents ToolStripStatusLabel1 As ToolStripStatusLabel
+    Friend WithEvents 设置文件配置ToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents 选择下载文件夹ToolStripMenuItem As ToolStripMenuItem
 End Class
