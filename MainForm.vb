@@ -1,13 +1,8 @@
 ﻿Imports System.IO
-Imports System.Net
+Imports System.Text
+Imports System.Xml
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
-Imports System.Text
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement
-Imports System.Xml
-Imports System.Runtime.CompilerServices.RuntimeHelpers
-Imports System.Security.AccessControl
-Imports System.Net.WebRequestMethods
 
 Public Class MainForm
     Dim ScanID As Integer = 0
@@ -26,6 +21,11 @@ Public Class MainForm
         CheckAutoRecommand() 'AutoClock
         DownloadDirCheck() 'DownloadDir
         LogText("*当前下载文件夹位置:" & DownLoadPath)
+        LogText("*当前AppId:" & Api_appId)
+        LogText("*当前accessToken:" & Api_accessToken)
+        LogText("*设置单次扫描下载上限:" & ScanMax)
+        LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
+        LogText(">>")
         Me.Text = My.Application.Info.ProductName.ToString & "[Ver." & My.Application.Info.Version.ToString & "]"
         ScanWebClient = New WebClient
         RecommandWebClient = New WebClient
@@ -378,8 +378,9 @@ Public Class MainForm
                 NextID(ScanGetType)
             Else
                 LogText("正在下载ID=" & ID & "的歌曲信息.", False)
-                If IO.File.Exists(DownLoadPath & FileNameStr) Then
+                If IO.File.Exists(DownLoadPath & FileNameStr & ".Mp3") Then
                     LogText("已存在ID=" & ID & "的歌曲[" & FileNameStr & "].")
+                    SuccessDownloadKey = NowDownloadKey
                     NextID(ScanGetType)
                 Else
                     If ScanGetType = False Then
@@ -451,6 +452,7 @@ Public Class MainForm
         ScanDelayTimer.Enabled = False
         ScanDelayTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
         If ScanIndex >= Int(ScanMax) Then
+            LogText("已达到单次扫描下载上限:" & ScanMax)
             ToolStripMenuItem_Scan_Click(Nothing, Nothing)
         Else
             GetPageInfo(ScanID, True)
@@ -489,8 +491,10 @@ Public Class MainForm
                 For i = 0 To MCount - 1
                     UrlCode = CType(JsonObjStr("data"), JArray).Item(i).ToString '//->data[]
                     Dim JsonObj_Name As New With {.name = ""}
-                    Dim MName As String = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).name.ToString
-                    RecommandNameArr.Add(MName)
+                    Dim RecommandSearchInfo As SearchInfo
+                    RecommandSearchInfo.Key = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).name.ToString
+                    RecommandSearchInfo.ID = i
+                    RecommandNameArr.Add(RecommandSearchInfo)
                 Next
                 LogText("正在解析今日歌单:" & RecommandNameArr.Count & "首.")
                 GetRecommandIDIndex = 0
@@ -542,11 +546,11 @@ Public Class MainForm
         GetRecommandIDTimer.Enabled = False
         If GetRecommandIDIndex < Math.Min(GetRecommandIDIndexCount, StopFlag_GetRecommandIDTimer) Then
             If Delay_Flag Then
-                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & RecommandNameArr(GetRecommandIDIndex) & "]" & "延迟等待:" & Int(GetRecommandIDTimer.Interval / 1000) & "s.", Not Delay_Flag)
+                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key & "]" & "延迟等待:" & Int(GetRecommandIDTimer.Interval / 1000) & "s.", Not Delay_Flag)
             Else
-                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & RecommandNameArr(GetRecommandIDIndex) & "]")
+                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key & "]")
             End If
-            GetRecommandMId(RecommandNameArr(GetRecommandIDIndex))
+            GetRecommandMId(CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key)
         Else
             Delay_Plus = 0
             LogText("解析今日歌单:" & GetSingleRecommandCount & "首.(" & RecommandIDArr.Count & "条歌曲数据)")
