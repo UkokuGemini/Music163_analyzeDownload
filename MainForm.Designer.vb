@@ -26,16 +26,15 @@ Partial Class MainForm
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.StatusStrip_St = New System.Windows.Forms.StatusStrip()
         Me.ToolStripStatusLabel_St = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.ToolStripStatusLabel2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.MenuStrip_Menu = New System.Windows.Forms.MenuStrip()
         Me.打开目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.打开软件目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.打卡下载目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.退出XToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.设置开机启动ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.设置文件配置ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.选择下载文件夹ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.退出XToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TextBox_Log = New System.Windows.Forms.TextBox()
         Me.GroupBox_Log = New System.Windows.Forms.GroupBox()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
@@ -50,13 +49,13 @@ Partial Class MainForm
         Me.ToolStripTextBox_Changeid = New System.Windows.Forms.ToolStripTextBox()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripSplitButton_Recommand = New System.Windows.Forms.ToolStripSplitButton()
+        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
+        Me.ToolStripSplitButton2 = New System.Windows.Forms.ToolStripSplitButton()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripTextBox_ListId = New System.Windows.Forms.ToolStripTextBox()
         Me.ToolStripSplitButton1 = New System.Windows.Forms.ToolStripSplitButton()
-        Me.ToolStripSplitButton2 = New System.Windows.Forms.ToolStripSplitButton()
         Me.Panel_Do = New System.Windows.Forms.Panel()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
-        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
         Me.StatusStrip_St.SuspendLayout()
         Me.MenuStrip_Menu.SuspendLayout()
         Me.GroupBox_Log.SuspendLayout()
@@ -68,7 +67,7 @@ Partial Class MainForm
         'StatusStrip_St
         '
         Me.StatusStrip_St.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.StatusStrip_St.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel_St, Me.ToolStripStatusLabel2})
+        Me.StatusStrip_St.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel_St})
         Me.StatusStrip_St.Location = New System.Drawing.Point(0, 519)
         Me.StatusStrip_St.Name = "StatusStrip_St"
         Me.StatusStrip_St.Size = New System.Drawing.Size(1166, 30)
@@ -81,18 +80,12 @@ Partial Class MainForm
         Me.ToolStripStatusLabel_St.Size = New System.Drawing.Size(27, 23)
         Me.ToolStripStatusLabel_St.Text = "St"
         '
-        'ToolStripStatusLabel2
-        '
-        Me.ToolStripStatusLabel2.Name = "ToolStripStatusLabel2"
-        Me.ToolStripStatusLabel2.Size = New System.Drawing.Size(195, 23)
-        Me.ToolStripStatusLabel2.Text = "ToolStripStatusLabel2"
-        '
         'MenuStrip_Menu
         '
         Me.MenuStrip_Menu.BackColor = System.Drawing.SystemColors.Control
         Me.MenuStrip_Menu.GripMargin = New System.Windows.Forms.Padding(2, 2, 0, 2)
         Me.MenuStrip_Menu.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.退出XToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.ToolStripButton1, Me.设置文件配置ToolStripMenuItem, Me.选择下载文件夹ToolStripMenuItem})
+        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.ToolStripButton1, Me.设置文件配置ToolStripMenuItem, Me.选择下载文件夹ToolStripMenuItem, Me.退出XToolStripMenuItem})
         Me.MenuStrip_Menu.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip_Menu.Name = "MenuStrip_Menu"
         Me.MenuStrip_Menu.Size = New System.Drawing.Size(1166, 37)
@@ -118,12 +111,6 @@ Partial Class MainForm
         Me.打卡下载目录ToolStripMenuItem.Size = New System.Drawing.Size(218, 34)
         Me.打卡下载目录ToolStripMenuItem.Text = "打开下载目录"
         '
-        '退出XToolStripMenuItem
-        '
-        Me.退出XToolStripMenuItem.Name = "退出XToolStripMenuItem"
-        Me.退出XToolStripMenuItem.Size = New System.Drawing.Size(85, 33)
-        Me.退出XToolStripMenuItem.Text = "退出(&X)"
-        '
         '设置开机启动ToolStripMenuItem
         '
         Me.设置开机启动ToolStripMenuItem.Name = "设置开机启动ToolStripMenuItem"
@@ -133,12 +120,11 @@ Partial Class MainForm
         'ToolStripButton1
         '
         Me.ToolStripButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
-        Me.ToolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
         Me.ToolStripButton1.Image = CType(resources.GetObject("ToolStripButton1.Image"), System.Drawing.Image)
         Me.ToolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripButton1.Name = "ToolStripButton1"
-        Me.ToolStripButton1.Size = New System.Drawing.Size(34, 28)
-        Me.ToolStripButton1.Text = "ToolStripButton1"
+        Me.ToolStripButton1.Size = New System.Drawing.Size(163, 28)
+        Me.ToolStripButton1.Text = "music.163.com"
         '
         '设置文件配置ToolStripMenuItem
         '
@@ -151,6 +137,12 @@ Partial Class MainForm
         Me.选择下载文件夹ToolStripMenuItem.Name = "选择下载文件夹ToolStripMenuItem"
         Me.选择下载文件夹ToolStripMenuItem.Size = New System.Drawing.Size(152, 33)
         Me.选择下载文件夹ToolStripMenuItem.Text = "选择下载文件夹"
+        '
+        '退出XToolStripMenuItem
+        '
+        Me.退出XToolStripMenuItem.Name = "退出XToolStripMenuItem"
+        Me.退出XToolStripMenuItem.Size = New System.Drawing.Size(85, 33)
+        Me.退出XToolStripMenuItem.Text = "退出(&X)"
         '
         'TextBox_Log
         '
@@ -261,8 +253,22 @@ Partial Class MainForm
         Me.ToolStripSplitButton_Recommand.Image = CType(resources.GetObject("ToolStripSplitButton_Recommand.Image"), System.Drawing.Image)
         Me.ToolStripSplitButton_Recommand.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripSplitButton_Recommand.Name = "ToolStripSplitButton_Recommand"
-        Me.ToolStripSplitButton_Recommand.Size = New System.Drawing.Size(193, 27)
-        Me.ToolStripSplitButton_Recommand.Text = "解析并下载每日歌单"
+        Me.ToolStripSplitButton_Recommand.Size = New System.Drawing.Size(103, 27)
+        Me.ToolStripSplitButton_Recommand.Text = "每日歌单"
+        '
+        'ToolStripSeparator4
+        '
+        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
+        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 32)
+        '
+        'ToolStripSplitButton2
+        '
+        Me.ToolStripSplitButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.ToolStripSplitButton2.Image = CType(resources.GetObject("ToolStripSplitButton2.Image"), System.Drawing.Image)
+        Me.ToolStripSplitButton2.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripSplitButton2.Name = "ToolStripSplitButton2"
+        Me.ToolStripSplitButton2.Size = New System.Drawing.Size(103, 27)
+        Me.ToolStripSplitButton2.Text = "推荐歌单"
         '
         'ToolStripSeparator1
         '
@@ -284,15 +290,6 @@ Partial Class MainForm
         Me.ToolStripSplitButton1.Size = New System.Drawing.Size(103, 27)
         Me.ToolStripSplitButton1.Text = "下载歌单"
         '
-        'ToolStripSplitButton2
-        '
-        Me.ToolStripSplitButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
-        Me.ToolStripSplitButton2.Image = CType(resources.GetObject("ToolStripSplitButton2.Image"), System.Drawing.Image)
-        Me.ToolStripSplitButton2.ImageTransparentColor = System.Drawing.Color.Magenta
-        Me.ToolStripSplitButton2.Name = "ToolStripSplitButton2"
-        Me.ToolStripSplitButton2.Size = New System.Drawing.Size(139, 27)
-        Me.ToolStripSplitButton2.Text = "解析推荐歌单"
-        '
         'Panel_Do
         '
         Me.Panel_Do.AutoSize = True
@@ -304,11 +301,6 @@ Partial Class MainForm
         Me.Panel_Do.Name = "Panel_Do"
         Me.Panel_Do.Size = New System.Drawing.Size(1166, 32)
         Me.Panel_Do.TabIndex = 10
-        '
-        'ToolStripSeparator4
-        '
-        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
-        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 32)
         '
         'MainForm
         '
@@ -370,7 +362,6 @@ Partial Class MainForm
     Friend WithEvents ToolStripStatusLabel1 As ToolStripStatusLabel
     Friend WithEvents 设置文件配置ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents 选择下载文件夹ToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents ToolStripStatusLabel2 As ToolStripStatusLabel
     Friend WithEvents ToolStripSplitButton2 As ToolStripSplitButton
     Friend WithEvents ToolStripSeparator4 As ToolStripSeparator
 End Class
