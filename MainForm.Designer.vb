@@ -26,6 +26,7 @@ Partial Class MainForm
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
         Me.StatusStrip_St = New System.Windows.Forms.StatusStrip()
         Me.ToolStripStatusLabel_St = New System.Windows.Forms.ToolStripStatusLabel()
+        Me.ToolStripStatusLabel2 = New System.Windows.Forms.ToolStripStatusLabel()
         Me.MenuStrip_Menu = New System.Windows.Forms.MenuStrip()
         Me.打开目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.打开软件目录ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -52,20 +53,22 @@ Partial Class MainForm
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripTextBox_ListId = New System.Windows.Forms.ToolStripTextBox()
         Me.ToolStripSplitButton1 = New System.Windows.Forms.ToolStripSplitButton()
-        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.ToolStripSplitButton2 = New System.Windows.Forms.ToolStripSplitButton()
+        Me.Panel_Do = New System.Windows.Forms.Panel()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
+        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
         Me.StatusStrip_St.SuspendLayout()
         Me.MenuStrip_Menu.SuspendLayout()
         Me.GroupBox_Log.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.ToolStrip1.SuspendLayout()
-        Me.Panel1.SuspendLayout()
+        Me.Panel_Do.SuspendLayout()
         Me.SuspendLayout()
         '
         'StatusStrip_St
         '
         Me.StatusStrip_St.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.StatusStrip_St.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel_St})
+        Me.StatusStrip_St.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel_St, Me.ToolStripStatusLabel2})
         Me.StatusStrip_St.Location = New System.Drawing.Point(0, 519)
         Me.StatusStrip_St.Name = "StatusStrip_St"
         Me.StatusStrip_St.Size = New System.Drawing.Size(1166, 30)
@@ -77,6 +80,12 @@ Partial Class MainForm
         Me.ToolStripStatusLabel_St.Name = "ToolStripStatusLabel_St"
         Me.ToolStripStatusLabel_St.Size = New System.Drawing.Size(27, 23)
         Me.ToolStripStatusLabel_St.Text = "St"
+        '
+        'ToolStripStatusLabel2
+        '
+        Me.ToolStripStatusLabel2.Name = "ToolStripStatusLabel2"
+        Me.ToolStripStatusLabel2.Size = New System.Drawing.Size(195, 23)
+        Me.ToolStripStatusLabel2.Text = "ToolStripStatusLabel2"
         '
         'MenuStrip_Menu
         '
@@ -205,7 +214,7 @@ Partial Class MainForm
         '
         Me.ToolStrip1.BackColor = System.Drawing.SystemColors.Control
         Me.ToolStrip1.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem_ScanButton, Me.ToolStripSeparator3, Me.更改IDToolStripMenuItem, Me.ToolStripTextBox_Changeid, Me.ToolStripSeparator2, Me.ToolStripSplitButton_Recommand, Me.ToolStripSeparator1, Me.ToolStripTextBox_ListId, Me.ToolStripSplitButton1})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem_ScanButton, Me.ToolStripSeparator3, Me.更改IDToolStripMenuItem, Me.ToolStripTextBox_Changeid, Me.ToolStripSeparator2, Me.ToolStripSplitButton_Recommand, Me.ToolStripSeparator4, Me.ToolStripSplitButton2, Me.ToolStripSeparator1, Me.ToolStripTextBox_ListId, Me.ToolStripSplitButton1})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Margin = New System.Windows.Forms.Padding(0, 5, 0, 5)
         Me.ToolStrip1.Name = "ToolStrip1"
@@ -275,17 +284,31 @@ Partial Class MainForm
         Me.ToolStripSplitButton1.Size = New System.Drawing.Size(103, 27)
         Me.ToolStripSplitButton1.Text = "下载歌单"
         '
-        'Panel1
+        'ToolStripSplitButton2
         '
-        Me.Panel1.AutoSize = True
-        Me.Panel1.Controls.Add(Me.ToolStrip1)
-        Me.Panel1.Dock = System.Windows.Forms.DockStyle.Top
-        Me.Panel1.Location = New System.Drawing.Point(0, 37)
-        Me.Panel1.MaximumSize = New System.Drawing.Size(0, 40)
-        Me.Panel1.MinimumSize = New System.Drawing.Size(0, 30)
-        Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(1166, 32)
-        Me.Panel1.TabIndex = 10
+        Me.ToolStripSplitButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text
+        Me.ToolStripSplitButton2.Image = CType(resources.GetObject("ToolStripSplitButton2.Image"), System.Drawing.Image)
+        Me.ToolStripSplitButton2.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.ToolStripSplitButton2.Name = "ToolStripSplitButton2"
+        Me.ToolStripSplitButton2.Size = New System.Drawing.Size(139, 27)
+        Me.ToolStripSplitButton2.Text = "解析推荐歌单"
+        '
+        'Panel_Do
+        '
+        Me.Panel_Do.AutoSize = True
+        Me.Panel_Do.Controls.Add(Me.ToolStrip1)
+        Me.Panel_Do.Dock = System.Windows.Forms.DockStyle.Top
+        Me.Panel_Do.Location = New System.Drawing.Point(0, 37)
+        Me.Panel_Do.MaximumSize = New System.Drawing.Size(0, 40)
+        Me.Panel_Do.MinimumSize = New System.Drawing.Size(0, 30)
+        Me.Panel_Do.Name = "Panel_Do"
+        Me.Panel_Do.Size = New System.Drawing.Size(1166, 32)
+        Me.Panel_Do.TabIndex = 10
+        '
+        'ToolStripSeparator4
+        '
+        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
+        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 32)
         '
         'MainForm
         '
@@ -293,7 +316,7 @@ Partial Class MainForm
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1166, 549)
         Me.Controls.Add(Me.GroupBox_Log)
-        Me.Controls.Add(Me.Panel1)
+        Me.Controls.Add(Me.Panel_Do)
         Me.Controls.Add(Me.StatusStrip_St)
         Me.Controls.Add(Me.MenuStrip_Menu)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -311,8 +334,8 @@ Partial Class MainForm
         Me.StatusStrip1.PerformLayout()
         Me.ToolStrip1.ResumeLayout(False)
         Me.ToolStrip1.PerformLayout()
-        Me.Panel1.ResumeLayout(False)
-        Me.Panel1.PerformLayout()
+        Me.Panel_Do.ResumeLayout(False)
+        Me.Panel_Do.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -339,7 +362,7 @@ Partial Class MainForm
     Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
     Friend WithEvents ToolStripMenuItem_ScanButton As ToolStripMenuItem
     Friend WithEvents ToolStripSplitButton_Recommand As ToolStripSplitButton
-    Friend WithEvents Panel1 As Panel
+    Friend WithEvents Panel_Do As Panel
     Friend WithEvents ToolStripTextBox_ListId As ToolStripTextBox
     Friend WithEvents ToolStripSplitButton1 As ToolStripSplitButton
     Friend WithEvents FolderBrowserDialog1 As FolderBrowserDialog
@@ -347,4 +370,7 @@ Partial Class MainForm
     Friend WithEvents ToolStripStatusLabel1 As ToolStripStatusLabel
     Friend WithEvents 设置文件配置ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents 选择下载文件夹ToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents ToolStripStatusLabel2 As ToolStripStatusLabel
+    Friend WithEvents ToolStripSplitButton2 As ToolStripSplitButton
+    Friend WithEvents ToolStripSeparator4 As ToolStripSeparator
 End Class

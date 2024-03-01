@@ -1,4 +1,5 @@
 ﻿Imports System.IO
+Imports System.Net.WebRequestMethods
 Imports System.Text
 Imports System.Xml
 Imports Newtonsoft.Json
@@ -10,6 +11,7 @@ Public Class MainForm
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
     ReadOnly ListUrl As String = "https://music.163.com/api/playlist/detail?id="
+    ReadOnly ListOriUrl As String = "https://music.163.com/#/playlist?id="
     ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadDirs\"
     ReadOnly LogPath As String = Directory.GetCurrentDirectory & "\ScanLog.Log"
     ReadOnly XmlSettingPath As String = Directory.GetCurrentDirectory & "\Music163_analyzeDownload_Setting.Xml"
@@ -39,12 +41,13 @@ Public Class MainForm
         FreshTimer.Interval = 60000
         GroupBox_Log.Text = "当前扫描ID:" & ScanID
         ToolStripStatusLabel_St.Text = ""
+        'Q()
     End Sub
     Dim TrueClose As Boolean = False
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         If TrueClose Then
             WriteXml("ScanId", ScanID)
-            IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  - -  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  - -  " & Format(Now, "yyyy-MM-dd HH:mm"))
             NotifyIcon1.Dispose()
         Else
             e.Cancel = True
@@ -82,9 +85,9 @@ Public Class MainForm
     Private Sub 选择下载文件夹ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 选择下载文件夹ToolStripMenuItem.Click
         FolderBrowserDialog1.ShowDialog()
         Dim FloderPath As String = FolderBrowserDialog1.SelectedPath & "\"
-        If IO.Directory.Exists(FloderPath) = False Then
+        If System.IO.Directory.Exists(FloderPath) = False Then
             Try
-                IO.Directory.CreateDirectory(FloderPath)
+                System.IO.Directory.CreateDirectory(FloderPath)
             Catch ex As Exception
                 FloderPath = TargetPath
             End Try
@@ -96,9 +99,9 @@ Public Class MainForm
         If Strings.Mid(DownLoadPath, DownLoadPath.Length, 1) <> "\" Then
             DownLoadPath &= "\"
         End If
-        If IO.Directory.Exists(DownLoadPath) = False Then
+        If System.IO.Directory.Exists(DownLoadPath) = False Then
             Try
-                IO.Directory.CreateDirectory(DownLoadPath)
+                System.IO.Directory.CreateDirectory(DownLoadPath)
             Catch ex As Exception
             End Try
         End If
@@ -197,7 +200,7 @@ Public Class MainForm
             End Select
         End If
     End Sub
-    Private Sub TextBox_Log_TextChanged(sender As Object, e As EventArgs) Handles TextBox_Log.TextChanged
+    Private Sub TextBox_Log_TextChanged(sender As Object, e As EventArgs)
         TextBox_Log.SelectionStart = TextBox_Log.TextLength
         TextBox_Log.ScrollToCaret()
     End Sub
@@ -378,7 +381,7 @@ Public Class MainForm
                 NextID(ScanGetType)
             Else
                 LogText("正在下载ID=" & ID & "的歌曲信息.", False)
-                If IO.File.Exists(DownLoadPath & FileNameStr & ".Mp3") Then
+                If System.IO.File.Exists(DownLoadPath & FileNameStr & ".Mp3") Then
                     LogText("已存在ID=" & ID & "的歌曲[" & FileNameStr & "].")
                     SuccessDownloadKey = NowDownloadKey
                     NextID(ScanGetType)
@@ -690,15 +693,19 @@ Public Class MainForm
         End If
     End Sub
 #End Region
+#Region "推荐歌单"
+    ReadOnly RecommendPlayList As String = "https://openapi.music.163.com/openapi/music/basic/recommend/playlist/get?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
+
+#End Region
 #Region "歌单"
     Dim ListId As String
     Dim ListFlag As Boolean = False
+    Dim NextListID As String
     Private Sub ToolStripSplitButton1_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
         ListFlag = Not ListFlag
         If ListFlag Then
             DownloadDirCheck()
             ListId = ToolStripTextBox_ListId.Text
-            ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             If ListId.Length > 0 AndAlso IsNumeric(ListId) Then
                 更改IDToolStripMenuItem.Enabled = False
@@ -770,6 +777,17 @@ Public Class MainForm
             DownloadListTimer.Enabled = True
         End If
     End Sub
+    Function GetContinueListID() As String
+        'Dim Doc As New HtmlAgilityPack.HtmlDocument
+        'Doc.LoadHtml(ChromiumWebBrowser_Cef.GetSourceAsync.Result)
+        'ChromiumWebBrowser_Cef.EvaluateScriptAsync("document.getElementsByName('song-list-pre-cache');")
+        'Try
+        '    system.IO.File.WriteAllText(system.IO.Directory.GetCurrentDirectory & "2.txt", Doc.GetElementbyId("song-list-pre-cache").OuterHtml)
+        '    Return 888
+        'Catch ex As Exception
+        '    Return -1
+        'End Try
+    End Function
     Private WithEvents DownloadListTimer As New System.Windows.Forms.Timer
     Private Sub DownloadListTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadListTimer.Tick
         DownloadListTimer.Enabled = False
@@ -780,7 +798,10 @@ Public Class MainForm
             ListFileNameStr = ReturnFileNameStr(TempMInfo)
             LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & ListArr.Count & ")", False)
             ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
+        ElseIf ListContinue Then
+
         Else
+            ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             LogText(" - - 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             ToolStripMenuItem_ScanButton.Enabled = True
@@ -795,6 +816,20 @@ Public Class MainForm
             End If
         End If
     End Sub
+    Dim ListContinue As Boolean = False
+
+    Private Sub ToolStripSplitButton2_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton2.ButtonClick
+
+    End Sub
+
+    Private Sub 歌单联想ToolStripMenuItem_Click(sender As Object, e As EventArgs)
+        ListContinue = Not ListContinue
+        If ListContinue Then
+            歌单联想ToolStripMenuItem.Text = "歌单联想✔️"
+        Else
+            歌单联想ToolStripMenuItem.Text = "歌单联想❌"
+        End If
+    End Sub
 #End Region
 #Region "XmlSetting"
     ReadOnly InitialXmlSettingStr As String = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf &
@@ -807,8 +842,8 @@ Public Class MainForm
 "<ScanMax>1000</ScanMax>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
-        If IO.File.Exists(XmlSettingPath) = False Then
-            IO.File.WriteAllText(XmlSettingPath, InitialXmlSettingStr)
+        If System.IO.File.Exists(XmlSettingPath) = False Then
+            System.IO.File.WriteAllText(XmlSettingPath, InitialXmlSettingStr)
         End If
         ScanID = ReadXmlKeyValue("ScanId", 0)
         DownLoadPath = ReadXmlKeyValue("DownloadDir", TargetPath)
