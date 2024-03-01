@@ -688,6 +688,7 @@ Public Class MainForm
     End Sub
     Sub GetRecommandList()
         DownloadRecommandSongSum = 0
+        DownloadRecommandListSum = 0
         RecommandListArr.Clear()
         Delay_Plus_List = 0
         Dim Api_Recommand_Now As String = RecommendListUrl & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
@@ -851,6 +852,9 @@ Public Class MainForm
                     End If
                     ListArr.Add(TempMinfo)
                 Next
+                If ListContinue Then
+                    DownloadRecommandListSum += 1
+                End If
                 LogText("歌单(ID=" & ListId & ")解析:" & ListArr.Count & "首歌曲.")
                 StopFlag_DownloadListTimer = ListArr.Count
                 DownloadListTimer.Interval = 1000
