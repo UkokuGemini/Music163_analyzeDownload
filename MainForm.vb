@@ -922,7 +922,7 @@ Public Class MainForm
 "<AutoClock>7</AutoClock>" & vbCrLf &
 "<DownloadDir>" & TargetPath & "</DownloadDir>" & vbCrLf &
 "<ScanId>0</ScanId>" & vbCrLf &
-"<AppId></AppId>" & vbCrLf &
+"<ScanMax>500</ScanMax>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
         If System.IO.File.Exists(XmlSettingPath) = False Then
