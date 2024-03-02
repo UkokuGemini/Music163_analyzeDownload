@@ -148,30 +148,31 @@ Public Class MainForm
             ToolStripMenuItem_ScanButton.Text = "扫描"
         End If
     End Sub
-    Dim StopFlag_GetRecommandIDTimer, StopFlag_DownloadRecommandTimer, StopFlag_DownloadListTimer As Integer
-    Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Recommand.ButtonClick
+    Dim StopFlag_GetRecommandIDTimer, StopFlag_DownloadRecommandTimer, StopFlag_DownloadListTimer, StopFlag_ContinueList As Integer
+    Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Daily.ButtonClick
         GoDaily()
     End Sub
     Sub GoDaily()
         RecommandFlag = Not RecommandFlag
         If RecommandFlag Then
             DownloadDirCheck()
-            ToolStripSplitButton_Recommand.Text = "停止解析[每日歌单]."
+            ToolStripSplitButton_Daily.Text = "停止解析[每日歌单]."
             If ScanFlag Then
                 ToolStripMenuItem_Scan_Click(Nothing, Nothing)
                 OnContinueScan = True
             End If
-            ToolStripSplitButton1.Enabled = False
+            ToolStripSplitButton_List.Enabled = False
             ToolStripMenuItem_ScanButton.Enabled = False
             更改IDToolStripMenuItem.Enabled = False
+            ToolStripSplitButton_ContinueList.Enabled = False
             RecommandStep = 1
             StopFlag_GetRecommandIDTimer = 0
             StopFlag_DownloadRecommandTimer = 0
             GetRecommandDaily()
         Else
-            ToolStripSplitButton_Recommand.Text = "每日歌单."
+            ToolStripSplitButton_Daily.Text = "每日歌单."
             Dim StopMsgResult As Integer = MsgBox("是否下载已解析的歌曲?", MsgBoxStyle.YesNo, "已解析:" & GetRecommandIDIndex & "首歌曲.")
-            ToolStripSplitButton_Recommand.Enabled = False
+            ToolStripSplitButton_Daily.Enabled = False
             Select Case RecommandStep
                 Case 2
                     StopFlag_GetRecommandIDTimer = -1
@@ -495,14 +496,15 @@ Public Class MainForm
                 StopFlag_GetRecommandIDTimer = GetRecommandIDIndexCount
                 GetRecommandIDTimer.Enabled = True
             Else
-                ToolStripSplitButton_Recommand.Text = "每日歌单."
+                ToolStripSplitButton_Daily.Text = "每日歌单."
                 RecommandFlag = False
                 RecommandStep = 0
                 RecommandIDArr.Clear()
-                ToolStripSplitButton_Recommand.Enabled = True
+                ToolStripSplitButton_Daily.Enabled = True
                 ToolStripMenuItem_ScanButton.Enabled = True
                 更改IDToolStripMenuItem.Enabled = True
-                ToolStripSplitButton1.Enabled = True
+                ToolStripSplitButton_List.Enabled = True
+                ToolStripSplitButton_ContinueList.Enabled = True
                 If OnContinueScan Then
                     OnContinueScan = False
                     ToolStripMenuItem_ScanButton.Text = "停止扫描"
@@ -512,14 +514,15 @@ Public Class MainForm
                 LogText("未获取到今日歌单.")
             End If
         Else
-            ToolStripSplitButton_Recommand.Text = "每日歌单."
+            ToolStripSplitButton_Daily.Text = "每日歌单."
             RecommandFlag = False
             RecommandStep = 0
             RecommandIDArr.Clear()
-            ToolStripSplitButton_Recommand.Enabled = True
+            ToolStripSplitButton_Daily.Enabled = True
             ToolStripMenuItem_ScanButton.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
-            ToolStripSplitButton1.Enabled = True
+            ToolStripSplitButton_List.Enabled = True
+            ToolStripSplitButton_ContinueList.Enabled = True
             If OnContinueScan Then
                 OnContinueScan = False
                 ToolStripMenuItem_ScanButton.Text = "停止扫描"
@@ -546,11 +549,13 @@ Public Class MainForm
             If StopFlag_DownloadRecommandTimer = -1 Then
                 RecommandStep = 0
                 RecommandIDArr.Clear()
-                LogText(" -- 今日歌单解析已中止!.")
-                ToolStripSplitButton_Recommand.Enabled = True
+                LogText(" -- [今日歌单]解析已中止!.")
+                LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+                ToolStripSplitButton_Daily.Enabled = True
                 ToolStripMenuItem_ScanButton.Enabled = True
                 更改IDToolStripMenuItem.Enabled = True
-                ToolStripSplitButton1.Enabled = True
+                ToolStripSplitButton_List.Enabled = True
+                ToolStripSplitButton_ContinueList.Enabled = True
                 If OnContinueScan Then
                     OnContinueScan = False
                     ToolStripMenuItem_ScanButton.Text = "停止扫描"
@@ -643,11 +648,13 @@ Public Class MainForm
         Else
             RecommandStep = 0
             RecommandIDArr.Clear()
-            LogText(" -- 今日歌单下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.")
+            LogText(" -- [今日歌单]下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.")
+            LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             ToolStripMenuItem_ScanButton.Enabled = True
-            ToolStripSplitButton_Recommand.Enabled = True
+            ToolStripSplitButton_Daily.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
-            ToolStripSplitButton1.Enabled = True
+            ToolStripSplitButton_List.Enabled = True
+            ToolStripSplitButton_ContinueList.Enabled = True
             If OnContinueScan Then
                 OnContinueScan = False
                 ToolStripMenuItem_ScanButton.Text = "停止扫描"
@@ -683,10 +690,23 @@ Public Class MainForm
     ReadOnly RecommendListSearchUrl As String = "https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s={<*>}&type=1000&offset=0&total=true&limit=20"
     Dim RecommandListArr As New ArrayList
     Dim RecommandDownloadIdArr As New ArrayList
-    Private Sub ToolStripSplitButton2_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton2.ButtonClick
-        GetRecommandList()
+    Dim RecommandListFlag As Boolean = False
+    Private Sub ToolStripSplitButton2_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_ContinueList.ButtonClick
+        RecommandListFlag = Not RecommandListFlag
+        If RecommandListFlag Then
+            GetRecommandList()
+            ToolStripSplitButton_ContinueList.Text = "停止解析[随机歌单]"
+            ToolStripSplitButton_List.Enabled = False
+            ToolStripMenuItem_ScanButton.Enabled = False
+            更改IDToolStripMenuItem.Enabled = False
+            ToolStripSplitButton_Daily.Enabled = False
+        Else
+            ToolStripSplitButton_ContinueList.Text = "随机歌单"
+            StopFlag_ContinueList = -1
+        End If
     End Sub
     Sub GetRecommandList()
+        StopFlag_ContinueList = 0
         Delay_Plus_ContinueList = 0
         DownloadRecommandSongSum = 0
         DownloadRecommandListSum = 0
@@ -714,6 +734,9 @@ Public Class MainForm
                 LogText("正在解析随机歌单:" & RecommandListArr.Count & "个.")
                 SearchListIDInsex = 0
                 RecommandDownloadIdArr.Clear()
+                If StopFlag_ContinueList <> -1 Then
+                    StopFlag_ContinueList = RecommandListArr.Count
+                End If
                 GetRecommandListIDTimer.Interval = 1000
                 GetRecommandListIDTimer.Enabled = True
             End If
@@ -723,7 +746,7 @@ Public Class MainForm
     Dim SearchListIDInsex As Integer
     Private Sub GetRecommandListIDTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetRecommandListIDTimer.Tick
         GetRecommandListIDTimer.Enabled = False
-        If SearchListIDInsex < RecommandListArr.Count Then
+        If SearchListIDInsex < Math.Min(RecommandListArr.Count, StopFlag_ContinueList) Then
             Dim UrlCode As String = GetWebCode(Replace(RecommendListSearchUrl, "<*>", RecommandListArr(SearchListIDInsex)))
             Dim JsonObj_Code As New With {.code = ""}
             Try
@@ -748,16 +771,27 @@ Public Class MainForm
                     Next
                 End If
                 GetRecommandListIDTimer.Interval = 1000
-            ElseIf JsonObj_Code.code = "406" OrElse JsonObj_Code.code = "405" OrElse JsonObj_Code.code = "-447" Then
-                Delay_Plus_List += 1
-                GetRecommandListIDTimer.Interval = 1000 + Delay_Plus_List * 5000
-                LogText("(" & SearchListIDInsex & "/" & RecommandListArr.Count & ")歌单搜索延迟(" & Int(GetRecommandListIDTimer.Interval / 1000) & "秒)", False)
+            Else
+                If JsonObj_Code.code = "406" OrElse JsonObj_Code.code = "405" OrElse JsonObj_Code.code = "-447" Then
+                    Delay_Plus_List += 1
+                    GetRecommandListIDTimer.Interval = 1000 + Delay_Plus_List * 5000
+                    LogText("(" & SearchListIDInsex & "/" & RecommandListArr.Count & ")歌单搜索延迟(" & Int(GetRecommandListIDTimer.Interval / 1000) & "秒)", False)
+                End If
+                Dim JsonObj_err As New With {.Msg = ""}
+                Try
+                    JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err) '//->Code
+                Catch ex As Exception
+                End Try
+                LogText("(" & SearchListIDInsex + 1 & "/" & RecommandListArr.Count & ")歌单搜索失败.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
             End If
             SearchListIDInsex += 1
             GetRecommandListIDTimer.Enabled = True
         Else
             '//解析完毕
-            LogText("开始自动下载随机歌单." & RecommandDownloadIdArr.Count & "个.")
+            If StopFlag_ContinueList <> -1 Then
+                LogText("开始自动下载随机歌单." & RecommandDownloadIdArr.Count & "个.")
+                StopFlag_ContinueList = RecommandDownloadIdArr.Count
+            End If
             DownloadRecommandListIndex = 0
             DownloadRecommandListTimer.Interval = 1000
             DownloadRecommandListTimer.Enabled = True
@@ -769,19 +803,26 @@ Public Class MainForm
     Dim ListContinue As Boolean = False
     Private Sub DownloadRecommandListTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadRecommandListTimer.Tick
         DownloadRecommandListTimer.Enabled = False
-        If DownloadRecommandListIndex < RecommandDownloadIdArr.Count Then
+        If DownloadRecommandListIndex < Math.Min(RecommandDownloadIdArr.Count, StopFlag_ContinueList) Then
             ListContinue = True
             ListFlag = False
             ToolStripTextBox_ListId.Text = CType(RecommandDownloadIdArr(DownloadRecommandListIndex), SearchInfo).ID
             ToolStripSplitButton1_ButtonClick(Nothing, Nothing)
         Else
-            LogText(" -- 随机歌单下载完成!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.")
+            If StopFlag_ContinueList Then
+                LogText(" -- [随机歌单]中止!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.")
+            Else
+                LogText(" -- [随机歌单]下载完成!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.")
+            End If
+            LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
+            StopFlag_ContinueList = 0
             ToolStripMenuItem_ScanButton.Enabled = True
-            ToolStripSplitButton_Recommand.Enabled = True
+            ToolStripSplitButton_Daily.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
-            ToolStripSplitButton1.Enabled = True
+            ToolStripSplitButton_List.Enabled = True
+            ToolStripSplitButton_ContinueList.Enabled = True
             If OnContinueScan Then
                 OnContinueScan = False
                 ToolStripMenuItem_ScanButton.Text = "停止扫描"
@@ -795,7 +836,7 @@ Public Class MainForm
     Dim ListId As String
     Dim ListFlag As Boolean = False
     Dim NextListID As String
-    Private Sub ToolStripSplitButton1_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton1.ButtonClick
+    Private Sub ToolStripSplitButton1_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_List.ButtonClick
         ListFlag = Not ListFlag
         If ListFlag Then
             DownloadDirCheck()
@@ -804,16 +845,19 @@ Public Class MainForm
             If ListId.Length > 0 AndAlso IsNumeric(ListId) Then
                 更改IDToolStripMenuItem.Enabled = False
                 ToolStripMenuItem_ScanButton.Enabled = False
-                ToolStripSplitButton_Recommand.Enabled = False
-                ToolStripSplitButton1.Enabled = False
-                If ScanFlag Then
-                    ToolStripMenuItem_Scan_Click(Nothing, Nothing)
-                    OnContinueScan = True
+                ToolStripSplitButton_Daily.Enabled = False
+                ToolStripSplitButton_List.Enabled = False
+                If RecommandListFlag = False Then
+                    ToolStripSplitButton_ContinueList.Enabled = False
                 End If
-                LogText("开始解析歌单(ID=" & ListId & ").")
-                DownloadList()
-            Else
-                ToolStripTextBox_ListId.Select()
+                If ScanFlag Then
+                        ToolStripMenuItem_Scan_Click(Nothing, Nothing)
+                        OnContinueScan = True
+                    End If
+                    LogText("开始解析歌单(ID=" & ListId & ").")
+                    DownloadList()
+                Else
+                    ToolStripTextBox_ListId.Select()
             End If
         Else
             LogText("歌单(ID=" & ListId & ")解析下载中止.")
@@ -872,7 +916,13 @@ Public Class MainForm
             End If
         Else
             Delay_Plus_ContinueList += 1
-            LogText("歌单(ID=" & ListId & ")抓取错误." & JsonObj_Code.ToString)
+            Dim JsonObj_err As New With {.Msg = ""}
+            Try
+                JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err) '//->Code
+            Catch ex As Exception
+            End Try
+            LogText("(" & SearchListIDInsex + 1 & "/" & RecommandListArr.Count & ")歌单搜索失败." & JsonObj_err.Msg)
+            LogText("歌单(ID=" & ListId & ")抓取错误.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
             StopFlag_DownloadListTimer = -1
             DownloadListTimer.Interval = 100
             DownloadListTimer.Enabled = True
@@ -904,9 +954,10 @@ Public Class MainForm
             StopFlag_DownloadListTimer = 0
             LogText(" -- 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             ToolStripMenuItem_ScanButton.Enabled = True
-            ToolStripSplitButton_Recommand.Enabled = True
+            ToolStripSplitButton_Daily.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
-            ToolStripSplitButton1.Enabled = True
+            ToolStripSplitButton_List.Enabled = True
+            ToolStripSplitButton_ContinueList.Enabled = True
             If OnContinueScan Then
                 OnContinueScan = False
                 ToolStripMenuItem_ScanButton.Text = "停止扫描"
