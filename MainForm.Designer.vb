@@ -268,7 +268,7 @@ Partial Class MainForm
         Me.ToolStripSplitButton2.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripSplitButton2.Name = "ToolStripSplitButton2"
         Me.ToolStripSplitButton2.Size = New System.Drawing.Size(103, 27)
-        Me.ToolStripSplitButton2.Text = "推荐歌单"
+        Me.ToolStripSplitButton2.Text = "随机歌单"
         '
         'ToolStripSeparator1
         '
@@ -313,7 +313,6 @@ Partial Class MainForm
         Me.Controls.Add(Me.MenuStrip_Menu)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip_Menu
-        Me.MaximizeBox = False
         Me.MinimumSize = New System.Drawing.Size(750, 600)
         Me.Name = "MainForm"
         Me.StatusStrip_St.ResumeLayout(False)
