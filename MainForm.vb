@@ -921,7 +921,6 @@ Public Class MainForm
                 JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err) '//->Code
             Catch ex As Exception
             End Try
-            LogText("(" & SearchListIDInsex + 1 & "/" & RecommandListArr.Count & ")歌单搜索失败." & JsonObj_err.Msg)
             LogText("歌单(ID=" & ListId & ")抓取错误.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
             StopFlag_DownloadListTimer = -1
             DownloadListTimer.Interval = 100
@@ -943,14 +942,16 @@ Public Class MainForm
                 DownloadRecommandSongSum += 1
             End If
         ElseIf ListContinue Then
-            LogText("歌单(ID=" & ListId & ")[" & CType(RecommandDownloadIdArr(DownloadRecommandListIndex), SearchInfo).Key & "]歌曲(" & ListIDIndex & "首)下载完成!")
-            DownloadRecommandListIndex += 1
-            If ListContinueSuccesFlag = False Then
-                DownloadRecommandListTimer.Interval = 1000 + 60000 * Delay_Plus_ContinueList
+            If ListIDIndex > 0 Then
+                LogText("歌单(ID=" & ListId & ")[" & CType(RecommandDownloadIdArr(DownloadRecommandListIndex), SearchInfo).Key & "]歌曲(" & ListIDIndex & "首)下载完成!")
             End If
-            DownloadRecommandListTimer.Enabled = True
-        Else
-            ToolStripTextBox_ListId.Text = ""
+            DownloadRecommandListIndex += 1
+                If ListContinueSuccesFlag = False Then
+                    DownloadRecommandListTimer.Interval = 1000 + 60000 * Delay_Plus_ContinueList
+                End If
+                DownloadRecommandListTimer.Enabled = True
+            Else
+                ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             LogText(" -- 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             ToolStripMenuItem_ScanButton.Enabled = True
