@@ -549,8 +549,7 @@ Public Class MainForm
             If StopFlag_DownloadRecommandTimer = -1 Then
                 RecommandStep = 0
                 RecommandIDArr.Clear()
-                LogText(" -- [今日歌单]解析已中止!.")
-                LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+                LogText(" -- [今日歌单]解析已中止!.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
                 ToolStripSplitButton_Daily.Enabled = True
                 ToolStripMenuItem_ScanButton.Enabled = True
                 更改IDToolStripMenuItem.Enabled = True
@@ -648,8 +647,7 @@ Public Class MainForm
         Else
             RecommandStep = 0
             RecommandIDArr.Clear()
-            LogText(" -- [今日歌单]下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.")
-            LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            LogText(" -- [今日歌单]下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             ToolStripMenuItem_ScanButton.Enabled = True
             ToolStripSplitButton_Daily.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
@@ -694,12 +692,12 @@ Public Class MainForm
     Private Sub ToolStripSplitButton2_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_ContinueList.ButtonClick
         RecommandListFlag = Not RecommandListFlag
         If RecommandListFlag Then
-            GetRecommandList()
             ToolStripSplitButton_ContinueList.Text = "停止解析[随机歌单]"
             ToolStripSplitButton_List.Enabled = False
             ToolStripMenuItem_ScanButton.Enabled = False
             更改IDToolStripMenuItem.Enabled = False
             ToolStripSplitButton_Daily.Enabled = False
+            GetRecommandList()
         Else
             ToolStripSplitButton_ContinueList.Text = "随机歌单"
             StopFlag_ContinueList = -1
@@ -809,12 +807,12 @@ Public Class MainForm
             ToolStripTextBox_ListId.Text = CType(RecommandDownloadIdArr(DownloadRecommandListIndex), SearchInfo).ID
             ToolStripSplitButton1_ButtonClick(Nothing, Nothing)
         Else
-            If StopFlag_ContinueList Then
-                LogText(" -- [随机歌单]中止!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.")
+            If StopFlag_ContinueList = -1 Then
+                LogText(" -- [随机歌单]中止!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             Else
-                LogText(" -- [随机歌单]下载完成!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.")
+                LogText(" -- [随机歌单]下载完成!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             End If
-            LogText("  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            ToolStripSplitButton_ContinueList.Text = "随机歌单"
             ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             StopFlag_ContinueList = 0
@@ -946,12 +944,12 @@ Public Class MainForm
                 LogText("歌单(ID=" & ListId & ")[" & CType(RecommandDownloadIdArr(DownloadRecommandListIndex), SearchInfo).Key & "]歌曲(" & ListIDIndex & "首)下载完成!")
             End If
             DownloadRecommandListIndex += 1
-                If ListContinueSuccesFlag = False Then
-                    DownloadRecommandListTimer.Interval = 1000 + 60000 * Delay_Plus_ContinueList
-                End If
-                DownloadRecommandListTimer.Enabled = True
-            Else
-                ToolStripTextBox_ListId.Text = ""
+            If ListContinueSuccesFlag = False Then
+                DownloadRecommandListTimer.Interval = 1000 + 60000 * Delay_Plus_ContinueList
+            End If
+            DownloadRecommandListTimer.Enabled = True
+        Else
+            ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             LogText(" -- 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             ToolStripMenuItem_ScanButton.Enabled = True
