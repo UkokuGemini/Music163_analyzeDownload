@@ -1,14 +1,13 @@
 ﻿Imports System.IO
-Imports System.Net.WebRequestMethods
 Imports System.Text
 Imports System.Xml
-Imports Music163_analyzeDownload.MainForm
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
 
 Public Class MainForm
     Dim ScanID As Integer = 0
     Dim AutoClock As Integer = -1
+    Dim AutoListClock As Integer = -1
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
     ReadOnly ListUrl As String = "https://music.163.com/api/playlist/detail?id="
@@ -665,15 +664,26 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "定时"
-    Dim FreshDate As Date
+    Dim FreshDate, FreshListDate As Date
     Private WithEvents FreshTimer As New System.Windows.Forms.Timer
     Sub CheckAutoRecommand()
+        Dim EnableFresh As Boolean = False
         If AutoClock > -1 AndAlso AutoClock < 24 Then
-            FreshTimer.Enabled = True
-            LogText("*已开启自动下载每日歌曲.@" & AutoClock & ":00")
+            EnableFresh = True
+            LogText("*已开启自动下载[每日歌曲].@" & AutoClock & ":00")
         Else
             AutoClock = -1
-            LogText("*未开启自动下载每日歌曲.")
+            LogText("*未开启自动下载[每日歌曲].")
+        End If
+        If AutoListClock > -1 AndAlso AutoListClock < 24 Then
+            EnableFresh = True
+            LogText("*已开启自动下载[随机歌单].@" & AutoListClock & ":00")
+        Else
+            AutoListClock = -1
+            LogText("*未开启自动下载[随机歌单].")
+        End If
+        If EnableFresh Then
+            FreshTimer.Enabled = True
         End If
     End Sub
     Private Sub FreshTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FreshTimer.Tick
@@ -681,6 +691,19 @@ Public Class MainForm
             FreshDate = Now.Date '//防止不断触发
             If DailyFlag = False Then
                 ToolStripSplitButton_Recommand_ButtonClick(Nothing, Nothing)
+            End If
+        End If
+        If AutoListClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoListClock AndAlso Now.Date > FreshListDate Then
+            FreshListDate = Now.Date '//防止不断触发
+            If DailyFlag Then
+                AutoListClock += 1
+                If AutoListClock > 23 Then
+                    AutoListClock = 0
+                End If
+            Else
+                If RecommandListFlag = False Then
+                    ToolStripSplitButton2_ButtonClick(Nothing, Nothing)
+                End If
             End If
         End If
     End Sub
@@ -972,10 +995,11 @@ Public Class MainForm
 #Region "XmlSetting"
     ReadOnly InitialXmlSettingStr As String = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf &
 "<Music163_analyzeDownload_Setting> " & vbCrLf &
-"<AutoClock>7</AutoClock>" & vbCrLf &
 "<DownloadDir>" & TargetPath & "</DownloadDir>" & vbCrLf &
 "<ScanId>0</ScanId>" & vbCrLf &
 "<ScanMax>500</ScanMax>" & vbCrLf &
+"<AutoClock>7</AutoClock>" & vbCrLf &
+"<AutoListClock>7</AutoListClock>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
         If System.IO.File.Exists(XmlSettingPath) = False Then
@@ -983,7 +1007,8 @@ Public Class MainForm
         End If
         ScanID = ReadXmlKeyValue("ScanId", 0)
         DownLoadPath = ReadXmlKeyValue("DownloadDir", TargetPath)
-        AutoClock = ReadXmlKeyValue("AutoClock", 7)
+        AutoClock = ReadXmlKeyValue("AutoClock", -1)
+        AutoListClock = ReadXmlKeyValue("AutoListClock", -1)
         ScanMax = ReadXmlKeyValue("ScanMax", "1000")
     End Sub
     Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
