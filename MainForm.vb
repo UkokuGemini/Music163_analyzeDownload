@@ -148,13 +148,13 @@ Public Class MainForm
             ToolStripMenuItem_ScanButton.Text = "扫描"
         End If
     End Sub
-    Dim StopFlag_GetRecommandIDTimer, StopFlag_DownloadRecommandTimer, StopFlag_DownloadListTimer, StopFlag_ContinueList As Integer
+    Dim StopFlag_GetDailyIDTimer, StopFlag_DownloadDailyTimer, StopFlag_DownloadListTimer, StopFlag_ContinueList As Integer
     Private Sub ToolStripSplitButton_Recommand_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_Daily.ButtonClick
         GoDaily()
     End Sub
     Sub GoDaily()
-        RecommandFlag = Not RecommandFlag
-        If RecommandFlag Then
+        DailyFlag = Not DailyFlag
+        If DailyFlag Then
             DownloadDirCheck()
             ToolStripSplitButton_Daily.Text = "停止解析[每日歌单]."
             If ScanFlag Then
@@ -166,27 +166,27 @@ Public Class MainForm
             更改IDToolStripMenuItem.Enabled = False
             ToolStripSplitButton_ContinueList.Enabled = False
             RecommandStep = 1
-            StopFlag_GetRecommandIDTimer = 0
-            StopFlag_DownloadRecommandTimer = 0
+            StopFlag_GetDailyIDTimer = 0
+            StopFlag_DownloadDailyTimer = 0
             GetRecommandDaily()
         Else
             ToolStripSplitButton_Daily.Text = "每日歌单."
-            Dim StopMsgResult As Integer = MsgBox("是否下载已解析的歌曲?", MsgBoxStyle.YesNo, "已解析:" & GetRecommandIDIndex & "首歌曲.")
+            Dim StopMsgResult As Integer = MsgBox("是否下载已解析的歌曲?", MsgBoxStyle.YesNo, "已解析:" & GetDaily_ID_Index & "首歌曲.")
             ToolStripSplitButton_Daily.Enabled = False
             Select Case RecommandStep
                 Case 2
-                    StopFlag_GetRecommandIDTimer = -1
-                    GetRecommandIDTimer.Interval = 100
-                    GetRecommandIDTimer.Enabled = True
+                    StopFlag_GetDailyIDTimer = -1
+                    GetDailyIDTimer.Interval = 100
+                    GetDailyIDTimer.Enabled = True
                     If StopMsgResult <> MsgBoxResult.Yes Then
-                        StopFlag_DownloadRecommandTimer = -1 '//不能填StopFlag_DownloadRecommandTimer = -1,否则不下载
-                        DownloadRecommandTimer.Interval = 100
+                        StopFlag_DownloadDailyTimer = -1 '//不能填StopFlag_DownloadDailyTimer = -1,否则不下载
+                        DownloadDailyTimer.Interval = 100
                     End If
                 Case 3
                     If StopMsgResult <> MsgBoxResult.Yes Then
-                        StopFlag_DownloadRecommandTimer = -1
-                        DownloadRecommandTimer.Interval = 100
-                        DownloadRecommandTimer.Enabled = True
+                        StopFlag_DownloadDailyTimer = -1
+                        DownloadDailyTimer.Interval = 100
+                        DownloadDailyTimer.Enabled = True
                     End If
             End Select
         End If
@@ -251,8 +251,8 @@ Public Class MainForm
     End Sub 'ProgressShow
     Public Sub RecommandDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
         ToolStripProgressBar_Update.Value = 100
-        RecommandDownloadSuccessSum += 1
-        LogText("(" & RecommandDownloadSuccessSum & "/" & GetSingleRecommandCount & ").""ID=" & NowDownloadRecommandId & "的歌曲[" & FileNameStr & "] - 下载完成!")
+        DailyDownloadSuccessSum += 1
+        LogText("(" & DailyDownloadSuccessSum & "/" & GetSingleDaily_Count & ").""ID=" & NowDownloadRecommandId & "的歌曲[" & FileNameStr & "] - 下载完成!")
         SuccessDownloadKey = NowDownloadKey
         NextID(False)
     End Sub '下载完成->启动子
@@ -263,7 +263,7 @@ Public Class MainForm
     Public Sub ListDownloadCompleted(ByVal sender As Object, ByVal e As System.ComponentModel.AsyncCompletedEventArgs)
         ToolStripProgressBar_Update.Value = 100
         ListIDIndex += 1
-        LogText("歌单(ID=" & ListId & ")(" & ListIDIndex & "/" & ListArr.Count & ").""ID=" & NowDownloadListId & "的歌曲[" & ListFileNameStr & "] - 下载完成!")
+        LogText("歌单(ID=" & ListId & ")(" & ListIDIndex & "/" & DailyListArr.Count & ").""ID=" & NowDownloadListId & "的歌曲[" & ListFileNameStr & "] - 下载完成!")
         DownloadListTimer.Enabled = True
     End Sub '下载完成->启动子
     Private Sub ShowListDownProgress(ByVal sender As Object, ByVal e As System.Net.DownloadProgressChangedEventArgs)
@@ -357,7 +357,7 @@ Public Class MainForm
     End Structure
     Dim FileNameStr, ListFileNameStr As String
     Dim ScanFlag As Boolean = False
-    Dim RecommandFlag As Boolean = False
+    Dim DailyFlag As Boolean = False
     Dim ScanIndex As Integer = 0
     Dim ScanMax As String
     Sub GetPageInfo(ByVal ID As String, ByVal ScanGetType As Boolean)
@@ -405,8 +405,8 @@ Public Class MainForm
                 ScanDelayTimer.Enabled = True
             End If
         Else
-            RecommandIDIndex += 1
-            DownloadRecommandTimer.Enabled = True
+            Daily_ID_Index += 1
+            DownloadDailyTimer.Enabled = True
         End If
     End Sub
     Function JsonRead(ByVal Id As String) As MInfo
@@ -415,7 +415,7 @@ Public Class MainForm
         Dim TempMInfo As New MInfo
         Dim JsonObj_Code As New With {.code = ""}
         Try
-            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
         Catch ex As Exception
             JsonObj_Code.code = "-1"
         End Try
@@ -456,20 +456,20 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "每日歌曲"
-    ReadOnly Api_Recommand As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
-    Dim RecommandNameArr As New ArrayList
-    Dim RecommandIDArr As New ArrayList
-    Dim ListArr As New ArrayList
+    ReadOnly Api_Daily As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
+    Dim DailyNameArr As New ArrayList
+    Dim DailyIDArr As New ArrayList
+    Dim DailyListArr As New ArrayList
     Sub GetRecommandDaily()
         SuccessDownloadKey = ""
         NowDownloadKey = ""
-        RecommandNameArr.Clear()
-        RecommandIDArr.Clear()
-        Dim Api_Recommand_Now As String = Api_Recommand & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
-        Dim UrlCode As String = GetWebCode(Api_Recommand_Now)
+        DailyNameArr.Clear()
+        DailyIDArr.Clear()
+        Dim Api_Daily_Now As String = Api_Daily & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
+        Dim UrlCode As String = GetWebCode(Api_Daily_Now)
         Dim JsonObj_Code As New With {.code = ""}
         Try
-            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
         Catch ex As Exception
             JsonObj_Code.code = "-1"
         End Try
@@ -478,28 +478,28 @@ Public Class MainForm
             Dim MCount As Integer = CType(JsonObjStr("data"), JArray).Count
             If MCount > 0 Then
                 For i = 0 To MCount - 1
-                    UrlCode = CType(JsonObjStr("data"), JArray).Item(i).ToString '//->data[]
+                    UrlCode = CType(JsonObjStr("data"), JArray).Item(i).ToString
                     Dim JsonObj_Name As New With {.name = ""}
                     Dim RecommandSearchInfo As SearchInfo
                     RecommandSearchInfo.Key = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).name.ToString
                     RecommandSearchInfo.ID = i
-                    RecommandNameArr.Add(RecommandSearchInfo)
+                    DailyNameArr.Add(RecommandSearchInfo)
                 Next
-                LogText("正在解析今日歌单:" & RecommandNameArr.Count & "首.")
-                GetRecommandIDIndex = 0
-                GetRecommandIDIndexCount = RecommandNameArr.Count
-                GetSingleRecommandCount = 0
-                RecommandIDIndex = 0
-                RecommandDownloadSuccessSum = 0
-                GetRecommandIDTimer.Interval = 1000
+                LogText("正在解析今日歌单:" & DailyNameArr.Count & "首.")
+                GetDaily_ID_Index = 0
+                GetDaily_ID_IndexCount = DailyNameArr.Count
+                GetSingleDaily_Count = 0
+                Daily_ID_Index = 0
+                DailyDownloadSuccessSum = 0
+                GetDailyIDTimer.Interval = 1000
                 RecommandStep = 2
-                StopFlag_GetRecommandIDTimer = GetRecommandIDIndexCount
-                GetRecommandIDTimer.Enabled = True
+                StopFlag_GetDailyIDTimer = GetDaily_ID_IndexCount
+                GetDailyIDTimer.Enabled = True
             Else
                 ToolStripSplitButton_Daily.Text = "每日歌单."
-                RecommandFlag = False
+                DailyFlag = False
                 RecommandStep = 0
-                RecommandIDArr.Clear()
+                DailyIDArr.Clear()
                 ToolStripSplitButton_Daily.Enabled = True
                 ToolStripMenuItem_ScanButton.Enabled = True
                 更改IDToolStripMenuItem.Enabled = True
@@ -515,9 +515,9 @@ Public Class MainForm
             End If
         Else
             ToolStripSplitButton_Daily.Text = "每日歌单."
-            RecommandFlag = False
+            DailyFlag = False
             RecommandStep = 0
-            RecommandIDArr.Clear()
+            DailyIDArr.Clear()
             ToolStripSplitButton_Daily.Enabled = True
             ToolStripMenuItem_ScanButton.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
@@ -532,23 +532,23 @@ Public Class MainForm
             LogText("今日歌单获取失败." & JsonObj_Code.code)
         End If
     End Sub
-    Private WithEvents GetRecommandIDTimer As New System.Windows.Forms.Timer
-    Private Sub GetRecommandIDTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetRecommandIDTimer.Tick
-        GetRecommandIDTimer.Enabled = False
-        If GetRecommandIDIndex < Math.Min(GetRecommandIDIndexCount, StopFlag_GetRecommandIDTimer) Then
+    Private WithEvents GetDailyIDTimer As New System.Windows.Forms.Timer
+    Private Sub GetDailyIDTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetDailyIDTimer.Tick
+        GetDailyIDTimer.Enabled = False
+        If GetDaily_ID_Index < Math.Min(GetDaily_ID_IndexCount, StopFlag_GetDailyIDTimer) Then
             If Delay_Flag Then
-                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key & "]" & "延迟等待:" & Int(GetRecommandIDTimer.Interval / 1000) & "s.", Not Delay_Flag)
+                LogText("正在解析今日歌单:(" & GetDaily_ID_Index + 1 & "/" & GetDaily_ID_IndexCount & ")首. - " & "[" & CType(DailyNameArr(GetDaily_ID_Index), SearchInfo).Key & "]" & "延迟等待:" & Int(GetDailyIDTimer.Interval / 1000) & "s.", Not Delay_Flag)
             Else
-                LogText("正在解析今日歌单:(" & GetRecommandIDIndex + 1 & "/" & GetRecommandIDIndexCount & ")首. - " & "[" & CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key & "]")
+                LogText("正在解析今日歌单:(" & GetDaily_ID_Index + 1 & "/" & GetDaily_ID_IndexCount & ")首. - " & "[" & CType(DailyNameArr(GetDaily_ID_Index), SearchInfo).Key & "]")
             End If
-            GetRecommandMId(CType(RecommandNameArr(GetRecommandIDIndex), SearchInfo).Key)
+            GetDaily_MusicID(CType(DailyNameArr(GetDaily_ID_Index), SearchInfo).Key)
         Else
             Delay_Plus = 0
-            LogText("解析今日歌单:" & GetSingleRecommandCount & "首.(" & RecommandIDArr.Count & "条歌曲数据)")
+            LogText("解析今日歌单:" & GetSingleDaily_Count & "首.(" & DailyIDArr.Count & "条歌曲数据)")
             RecommandStep = 3
-            If StopFlag_DownloadRecommandTimer = -1 Then
+            If StopFlag_DownloadDailyTimer = -1 Then
                 RecommandStep = 0
-                RecommandIDArr.Clear()
+                DailyIDArr.Clear()
                 LogText(" -- [今日歌单]解析已中止!.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
                 ToolStripSplitButton_Daily.Enabled = True
                 ToolStripMenuItem_ScanButton.Enabled = True
@@ -562,7 +562,7 @@ Public Class MainForm
                     ScanFlag = True
                 End If
             Else
-                DownloadRecommand()
+                DownloadDaily()
             End If
         End If
     End Sub
@@ -570,21 +570,21 @@ Public Class MainForm
         Dim Key As String
         Dim ID As String
     End Structure
-    Dim GetRecommandIDIndex As Integer '//NameArr 当前第几条
-    Dim GetRecommandIDIndexCount As Integer '//NameArr 词条总数(需要下载的歌曲数量)
-    Dim GetSingleRecommandCount As Integer '//实际下载歌曲数(与GetRecommandIDIndexCount差在有Key但没有搜索到)
-    Dim RecommandIDIndex As Integer '//获取链接条目数
-    Dim RecommandDownloadSuccessSum As Integer '//成功下载数
+    Dim GetDaily_ID_Index As Integer '//NameArr 当前第几条
+    Dim GetDaily_ID_IndexCount As Integer '//NameArr 词条总数(需要下载的歌曲数量)
+    Dim GetSingleDaily_Count As Integer '//实际下载歌曲数(与GetDaily_ID_IndexCount差在有Key但没有搜索到)
+    Dim Daily_ID_Index As Integer '//获取链接条目数
+    Dim DailyDownloadSuccessSum As Integer '//成功下载数
     Dim ListIDIndex As Integer '//
     Dim ListDownloadSuccessSum As Integer '//
     Dim Delay_Plus, Delay_Plus_List, Delay_Plus_ContinueList As Integer
     Dim Delay_Flag As Boolean
-    Sub GetRecommandMId(ByVal SearchKey As String)
+    Sub GetDaily_MusicID(ByVal SearchKey As String)
         Dim SearchUrl As String = "https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s=" & SearchKey & "&type=1&offset=0&total=true&limit=5"
         Dim UrlCode As String = GetWebCode(SearchUrl)
         Dim JsonObj_Code As New With {.code = ""}
         Try
-            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
         Catch ex As Exception
             JsonObj_Code.code = "-1"
         End Try
@@ -594,60 +594,62 @@ Public Class MainForm
             Dim JsonObj_songs As JObject = CType(JsonConvert.DeserializeObject(JsonObj_res("result").ToString), JObject)
             Dim MCount As Integer = CType(JsonObj_songs("songs"), JArray).Count
             If MCount > 0 Then
-                GetSingleRecommandCount += 1
+                GetSingleDaily_Count += 1
                 For i = 0 To MCount - 1
                     Dim JsonObj_ID As JObject = CType(JsonConvert.DeserializeObject(JsonObj_songs("songs")(i).ToString), JObject)
                     Dim TempSearchInfo As SearchInfo
                     TempSearchInfo.ID = JsonObj_ID("id")
                     TempSearchInfo.Key = SearchKey
                     If TempSearchInfo.ID.Length > 0 Then
-                        RecommandIDArr.Add(TempSearchInfo)
+                        DailyIDArr.Add(TempSearchInfo)
                     End If
                 Next
             End If
-            GetRecommandIDIndex += 1
-            GetRecommandIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
+            GetDaily_ID_Index += 1
+            GetDailyIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
         ElseIf JsonObj_Code.code = "406" OrElse JsonObj_Code.code = "405" OrElse JsonObj_Code.code = "-447" Then
             Delay_Flag = True
             Delay_Plus += 15000
             If Delay_Plus >= 3600000 Then
-                GetRecommandIDIndex += 1
+                GetDaily_ID_Index += 1
                 Delay_Plus = 1800000
             End If
             Delay_Plus = Math.Min(1800000, Delay_Plus)
-            GetRecommandIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000 + Delay_Plus
+            GetDailyIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000 + Delay_Plus
         Else
-            GetRecommandIDIndex += 1
-            GetRecommandIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
+            GetDaily_ID_Index += 1
+            GetDailyIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
         End If
-        GetRecommandIDTimer.Enabled = True
+        GetDailyIDTimer.Enabled = True
     End Sub
-    Sub DownloadRecommand()
-        LogText("开始下载今日歌单:" & GetSingleRecommandCount & "首.(" & RecommandIDArr.Count & "条歌曲数据)")
-        StopFlag_DownloadRecommandTimer = RecommandIDArr.Count
-        DownloadRecommandTimer.Interval = 1000
-        DownloadRecommandTimer.Enabled = True
+    Sub DownloadDaily()
+        LogText("开始下载今日歌单:" & GetSingleDaily_Count & "首.(" & DailyIDArr.Count & "条歌曲数据)")
+        StopFlag_DownloadDailyTimer = DailyIDArr.Count
+        DownloadDailyTimer.Interval = 1000
+        DownloadDailyTimer.Enabled = True
     End Sub
-    Private WithEvents DownloadRecommandTimer As New System.Windows.Forms.Timer
+    Private WithEvents DownloadDailyTimer As New System.Windows.Forms.Timer
     Dim SuccessDownloadKey, NowDownloadKey As String
     Dim NowDownloadRecommandId, NowDownloadListId As String
-    Private Sub DownloadRecommandTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadRecommandTimer.Tick
-        DownloadRecommandTimer.Enabled = False
-        DownloadRecommandTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
-        If RecommandIDIndex < Math.Min(RecommandIDArr.Count, StopFlag_DownloadRecommandTimer) Then
-            Dim TempSearchInfo As SearchInfo = RecommandIDArr(RecommandIDIndex)
+    Private Sub DownloadDailyTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadDailyTimer.Tick
+        DownloadDailyTimer.Enabled = False
+        DownloadDailyTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
+        If Daily_ID_Index < Math.Min(DailyIDArr.Count, StopFlag_DownloadDailyTimer) Then
+            Dim TempSearchInfo As SearchInfo = DailyIDArr(Daily_ID_Index)
             If SuccessDownloadKey <> TempSearchInfo.Key OrElse (SuccessDownloadKey = "" AndAlso TempSearchInfo.Key = "") Then
                 NowDownloadKey = TempSearchInfo.Key
                 GetPageInfo(TempSearchInfo.ID, False)
             Else
                 LogText("已跳过类似[ " & TempSearchInfo.Key & " ]歌曲:ID=" & TempSearchInfo.ID, False)
-                DownloadRecommandTimer.Interval = 100
+                DownloadDailyTimer.Interval = 100
                 NextID(False)
             End If
         Else
             RecommandStep = 0
-            RecommandIDArr.Clear()
-            LogText(" -- [今日歌单]下载结束!总计下载:" & RecommandDownloadSuccessSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            DailyIDArr.Clear()
+            LogText(" -- [今日歌单]下载结束!总计下载:" & DailyDownloadSuccessSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            ToolStripSplitButton_Daily.Text = "每日歌单."
+            DailyFlag = False
             ToolStripMenuItem_ScanButton.Enabled = True
             ToolStripSplitButton_Daily.Enabled = True
             更改IDToolStripMenuItem.Enabled = True
@@ -677,7 +679,7 @@ Public Class MainForm
     Private Sub FreshTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FreshTimer.Tick
         If AutoClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoClock AndAlso Now.Date > FreshDate.Date Then
             FreshDate = Now.Date '//防止不断触发
-            If RecommandFlag = False Then
+            If DailyFlag = False Then
                 ToolStripSplitButton_Recommand_ButtonClick(Nothing, Nothing)
             End If
         End If
@@ -686,7 +688,7 @@ Public Class MainForm
 #Region "随机歌单"
     ReadOnly RecommendListUrl As String = "https://openapi.music.163.com/openapi/music/basic/recommend/playlist/get?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A10%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
     ReadOnly RecommendListSearchUrl As String = "https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s={<*>}&type=1000&offset=0&total=true&limit=20"
-    Dim RecommandListArr As New ArrayList
+    Dim RecommandDailyListArr As New ArrayList
     Dim RecommandDownloadIdArr As New ArrayList
     Dim RecommandListFlag As Boolean = False
     Private Sub ToolStripSplitButton2_ButtonClick(sender As Object, e As EventArgs) Handles ToolStripSplitButton_ContinueList.ButtonClick
@@ -708,32 +710,32 @@ Public Class MainForm
         Delay_Plus_ContinueList = 0
         DownloadRecommandSongSum = 0
         DownloadRecommandListSum = 0
-        RecommandListArr.Clear()
+        RecommandDailyListArr.Clear()
         Delay_Plus_List = 0
-        Dim Api_Recommand_Now As String = RecommendListUrl & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
-        Dim UrlCode As String = GetWebCode(Api_Recommand_Now)
+        Dim Api_Daily_Now As String = RecommendListUrl & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
+        Dim UrlCode As String = GetWebCode(Api_Daily_Now)
         Dim JsonObj_Code As New With {.code = ""}
         Try
-            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
         Catch ex As Exception
             JsonObj_Code.code = "-1"
         End Try
         If JsonObj_Code.code = "200" Then
             Dim JsonObjStr As JObject = CType(JsonConvert.DeserializeObject(UrlCode), JObject)
             Dim Json_Records As New With {.name = ""}
-            'Json_Records = JsonConvert.DeserializeAnonymousType(JsonObjStr("data")("records"), Json_Records) '//->Code
+            'Json_Records = JsonConvert.DeserializeAnonymousType(JsonObjStr("data")("records"), Json_Records) 
             Dim MCount As Integer = CType(JsonObjStr("data")("records"), JArray).Count
             If MCount > 0 Then
                 For i = 0 To MCount - 1
-                    UrlCode = CType(JsonObjStr("data")("records"), JArray).Item(i).ToString '//->data[]
+                    UrlCode = CType(JsonObjStr("data")("records"), JArray).Item(i).ToString
                     Dim JsonObj_Name As New With {.name = ""}
-                    RecommandListArr.Add(JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).name.ToString)
+                    RecommandDailyListArr.Add(JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).name.ToString)
                 Next
-                LogText("正在解析随机歌单:" & RecommandListArr.Count & "个.")
+                LogText("正在解析随机歌单:" & RecommandDailyListArr.Count & "个.")
                 SearchListIDInsex = 0
                 RecommandDownloadIdArr.Clear()
                 If StopFlag_ContinueList <> -1 Then
-                    StopFlag_ContinueList = RecommandListArr.Count
+                    StopFlag_ContinueList = RecommandDailyListArr.Count
                 End If
                 GetRecommandListIDTimer.Interval = 1000
                 GetRecommandListIDTimer.Enabled = True
@@ -744,11 +746,11 @@ Public Class MainForm
     Dim SearchListIDInsex As Integer
     Private Sub GetRecommandListIDTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles GetRecommandListIDTimer.Tick
         GetRecommandListIDTimer.Enabled = False
-        If SearchListIDInsex < Math.Min(RecommandListArr.Count, StopFlag_ContinueList) Then
-            Dim UrlCode As String = GetWebCode(Replace(RecommendListSearchUrl, "<*>", RecommandListArr(SearchListIDInsex)))
+        If SearchListIDInsex < Math.Min(RecommandDailyListArr.Count, StopFlag_ContinueList) Then
+            Dim UrlCode As String = GetWebCode(Replace(RecommendListSearchUrl, "<*>", RecommandDailyListArr(SearchListIDInsex)))
             Dim JsonObj_Code As New With {.code = ""}
             Try
-                JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+                JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
             Catch ex As Exception
                 JsonObj_Code.code = "-1"
             End Try
@@ -757,14 +759,14 @@ Public Class MainForm
                 Dim MCount As Integer = CType(JsonObjStr("result")("playlists"), JArray).Count
                 If MCount > 0 Then
                     For i = 0 To MCount - 1
-                        UrlCode = CType(JsonObjStr("result")("playlists"), JArray).Item(i).ToString '//->data[]
+                        UrlCode = CType(JsonObjStr("result")("playlists"), JArray).Item(i).ToString
                         Dim SInfo As SearchInfo
                         Dim JsonObj_ID As New With {.id = ""}
                         SInfo.ID = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_ID).id.ToString
                         Dim JsonObj_Name As New With {.Name = ""}
                         SInfo.Key = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Name).Name.ToString
                         RecommandDownloadIdArr.Add(SInfo)
-                        LogText("(" & SearchListIDInsex + 1 & "/" & RecommandListArr.Count & ")找到歌单[" & SInfo.Key & "].ID=" & SInfo.ID)
+                        LogText("(" & SearchListIDInsex + 1 & "/" & RecommandDailyListArr.Count & ")找到歌单[" & SInfo.Key & "].ID=" & SInfo.ID)
                         Exit For
                     Next
                 End If
@@ -773,14 +775,14 @@ Public Class MainForm
                 If JsonObj_Code.code = "406" OrElse JsonObj_Code.code = "405" OrElse JsonObj_Code.code = "-447" Then
                     Delay_Plus_List += 1
                     GetRecommandListIDTimer.Interval = 1000 + Delay_Plus_List * 5000
-                    LogText("(" & SearchListIDInsex & "/" & RecommandListArr.Count & ")歌单搜索延迟(" & Int(GetRecommandListIDTimer.Interval / 1000) & "秒)", False)
+                    LogText("(" & SearchListIDInsex & "/" & RecommandDailyListArr.Count & ")歌单搜索延迟(" & Int(GetRecommandListIDTimer.Interval / 1000) & "秒)", False)
                 End If
                 Dim JsonObj_err As New With {.Msg = ""}
                 Try
-                    JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err) '//->Code
+                    JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err)
                 Catch ex As Exception
                 End Try
-                LogText("(" & SearchListIDInsex + 1 & "/" & RecommandListArr.Count & ")歌单搜索失败.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
+                LogText("(" & SearchListIDInsex + 1 & "/" & RecommandDailyListArr.Count & ")歌单搜索失败.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
             End If
             SearchListIDInsex += 1
             GetRecommandListIDTimer.Enabled = True
@@ -812,6 +814,7 @@ Public Class MainForm
             Else
                 LogText(" -- [随机歌单]下载完成!共" & DownloadRecommandListSum & "个歌单." & DownloadRecommandSongSum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             End If
+            RecommandListFlag = False
             ToolStripSplitButton_ContinueList.Text = "随机歌单"
             ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
@@ -849,13 +852,13 @@ Public Class MainForm
                     ToolStripSplitButton_ContinueList.Enabled = False
                 End If
                 If ScanFlag Then
-                        ToolStripMenuItem_Scan_Click(Nothing, Nothing)
-                        OnContinueScan = True
-                    End If
-                    LogText("开始解析歌单(ID=" & ListId & ").")
-                    DownloadList()
-                Else
-                    ToolStripTextBox_ListId.Select()
+                    ToolStripMenuItem_Scan_Click(Nothing, Nothing)
+                    OnContinueScan = True
+                End If
+                LogText("开始解析歌单(ID=" & ListId & ").")
+                DownloadList()
+            Else
+                ToolStripTextBox_ListId.Select()
             End If
         Else
             LogText("歌单(ID=" & ListId & ")解析下载中止.")
@@ -868,12 +871,12 @@ Public Class MainForm
     Sub DownloadList()
         ListContinueSuccesFlag = False
         ListIDIndex = 0
-        ListArr.Clear()
+        DailyListArr.Clear()
         Dim ListUrlStr As String = ListUrl & ListId
         Dim UrlCode As String = GetWebCode(ListUrlStr)
         Dim JsonObj_Code As New With {.code = ""}
         Try
-            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code) '//->Code
+            JsonObj_Code = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_Code)
         Catch ex As Exception
             JsonObj_Code.code = "-1"
         End Try
@@ -897,13 +900,13 @@ Public Class MainForm
                             End If
                         Next
                     End If
-                    ListArr.Add(TempMinfo)
+                    DailyListArr.Add(TempMinfo)
                 Next
                 If ListContinue Then
                     DownloadRecommandListSum += 1
                 End If
-                LogText("歌单(ID=" & ListId & ")解析:" & ListArr.Count & "首歌曲.")
-                StopFlag_DownloadListTimer = ListArr.Count
+                LogText("歌单(ID=" & ListId & ")解析:" & DailyListArr.Count & "首歌曲.")
+                StopFlag_DownloadListTimer = DailyListArr.Count
                 DownloadListTimer.Interval = 1000
                 DownloadListTimer.Enabled = True
             Else
@@ -916,7 +919,7 @@ Public Class MainForm
             Delay_Plus_ContinueList += 1
             Dim JsonObj_err As New With {.Msg = ""}
             Try
-                JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err) '//->Code
+                JsonObj_err = JsonConvert.DeserializeAnonymousType(UrlCode, JsonObj_err)
             Catch ex As Exception
             End Try
             LogText("歌单(ID=" & ListId & ")抓取错误.(" & JsonObj_Code.code & ":" & JsonObj_err.Msg & ")")
@@ -928,13 +931,13 @@ Public Class MainForm
     Private WithEvents DownloadListTimer As New System.Windows.Forms.Timer
     Private Sub DownloadListTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DownloadListTimer.Tick
         DownloadListTimer.Enabled = False
-        If ListIDIndex < Math.Min(ListArr.Count, StopFlag_DownloadListTimer) Then
+        If ListIDIndex < Math.Min(DailyListArr.Count, StopFlag_DownloadListTimer) Then
             Randomize()
             DownloadListTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
-            Dim TempMInfo As MInfo = ListArr(ListIDIndex)
+            Dim TempMInfo As MInfo = DailyListArr(ListIDIndex)
             NowDownloadListId = TempMInfo.ID
             ListFileNameStr = ReturnFileNameStr(TempMInfo)
-            LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & ListArr.Count & ")", False)
+            LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & DailyListArr.Count & ")", False)
             ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
             If ListContinue Then
                 DownloadRecommandSongSum += 1
