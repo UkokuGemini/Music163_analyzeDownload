@@ -15,6 +15,7 @@ Public Class MainForm
     ReadOnly TargetPath As String = Directory.GetCurrentDirectory & "\DownloadDirs\"
     ReadOnly LogPath As String = Directory.GetCurrentDirectory & "\ScanLog.Log"
     ReadOnly XmlSettingPath As String = Directory.GetCurrentDirectory & "\Music163_analyzeDownload_Setting.Xml"
+    ReadOnly RepeatPath As String = Directory.GetCurrentDirectory & "\RepeatName.ini"
     Dim DownLoadPath As String
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CenterToScreen()
@@ -26,6 +27,11 @@ Public Class MainForm
         'LogText("*当前AppId:" & Api_appId)
         'LogText("*当前accessToken:" & Api_accessToken)
         LogText("*设置单次扫描下载上限:" & ScanMax)
+        LogText("*歌曲避免重复下载:" & NoRepeat)
+        If IO.File.Exists(RepeatPath) Then
+            RepeatArr.AddRange(IO.File.ReadAllLines(RepeatPath))
+            LogText("  --  下载记录:" & RepeatArr.Count & "条.")
+        End If
         LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
         LogText(">>")
         Me.Text = My.Application.Info.ProductName.ToString & "[Ver." & My.Application.Info.Version.ToString & "]"
@@ -38,7 +44,7 @@ Public Class MainForm
         AddHandler ListWebClient.DownloadProgressChanged, AddressOf ShowListDownProgress
         AddHandler ListWebClient.DownloadFileCompleted, AddressOf ListDownloadCompleted
         ScanDelayTimer.Interval = 1000
-        FreshTimer.Interval = 60000
+            FreshTimer.Interval = 60000
         GroupBox_Log.Text = "当前扫描ID:" & ScanID
         ToolStripStatusLabel_St.Text = ""
         'Q()
@@ -47,6 +53,11 @@ Public Class MainForm
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         If TrueClose Then
             WriteXml("ScanId", ScanID)
+            If RepeatArr.Count > 0 Then
+                For Each Mstr As String In RepeatArr
+                    IO.File.AppendAllText(RepeatPath, Mstr & vbCrLf )
+                Next
+            End If
             System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             NotifyIcon1.Dispose()
         Else
@@ -83,8 +94,11 @@ Public Class MainForm
         Diagnostics.Process.Start(XmlSettingPath)
     End Sub
     Private Sub 选择下载文件夹ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 选择下载文件夹ToolStripMenuItem.Click
-        FolderBrowserDialog1.ShowDialog()
-        Dim FloderPath As String = FolderBrowserDialog1.SelectedPath & "\"
+        Dim FloderPath As String = DownLoadPath
+        Dim FolderRes As DialogResult = FolderBrowserDialog1.ShowDialog()
+        If FolderRes <> DialogResult.Cancel Then
+            FloderPath = FolderBrowserDialog1.SelectedPath & "\"
+        End If
         If System.IO.Directory.Exists(FloderPath) = False Then
             Try
                 System.IO.Directory.CreateDirectory(FloderPath)
@@ -225,6 +239,22 @@ Public Class MainForm
         End If
     End Sub
 #End Region
+#Region "重复检查"
+    Dim RepeatArr As New ArrayList
+    Dim NoRepeat As Boolean = False
+    Function RepeatCheck(ByVal NameStr As String) As Boolean
+        If NoRepeat Then
+            If RepeatArr.Contains(NameStr) Then
+                Return True
+            Else
+                RepeatArr.Add(NameStr)
+                Return False
+            End If
+        Else
+            Return False
+        End If
+    End Function
+#End Region
 #Region "下载文件"
     Friend ScanWebClient As New System.Net.WebClient
     Friend RecommandWebClient As New System.Net.WebClient
@@ -270,7 +300,7 @@ Public Class MainForm
         ToolStripStatusLabel_UpdatePer.Text = e.ProgressPercentage & "%[" & FileSize(e.BytesReceived) & "/" & FileSize(e.TotalBytesToReceive) & "]"
     End Sub 'ProgressShow
     Function FileSize(ByVal FileByte As Long) As String
-        If FileByte < 1048576 Then
+        If FileByte <1048576 Then
             Return Math.Round(FileByte / 1024, 2) & "KB"
         ElseIf FileByte < 1024 Then
             Return Math.Round(FileByte / 1024, 2) & "B"
@@ -381,7 +411,12 @@ Public Class MainForm
                     If ScanGetType = False Then
                         NowDownloadRecommandId = ID
                     End If
-                    DownloadFiles(FileUrl & ID, DownLoadPath & FileNameStr & ".Mp3", ScanGetType)
+                    If RepeatCheck(FileNameStr) = False Then
+                        DownloadFiles(FileUrl & ID, DownLoadPath & FileNameStr & ".Mp3", ScanGetType)
+                    Else
+                        LogText("已下载过ID=" & ID & "的歌曲[" & FileNameStr & "].<RepeatName>")
+                        NextID(ScanGetType)
+                    End If
                 End If
             End If
         End If
@@ -961,7 +996,13 @@ Public Class MainForm
             NowDownloadListId = TempMInfo.ID
             ListFileNameStr = ReturnFileNameStr(TempMInfo)
             LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & DailyListArr.Count & ")", False)
-            ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
+            If RepeatCheck(ListFileNameStr) = False Then
+                ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
+            Else
+                LogText("已下载过ID=" & NowDownloadListId & "的歌曲[" & FileNameStr & "].<RepeatName>")
+                ListIDIndex += 1
+                DownloadListTimer.Enabled = True
+            End If
             If ListContinue Then
                 DownloadRecommandSongSum += 1
             End If
@@ -1000,6 +1041,7 @@ Public Class MainForm
 "<ScanMax>500</ScanMax>" & vbCrLf &
 "<AutoClock>-1</AutoClock>" & vbCrLf &
 "<AutoListClock>-1</AutoListClock>" & vbCrLf &
+"<NoRepeat>0</NoRepeat>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
         If System.IO.File.Exists(XmlSettingPath) = False Then
@@ -1010,6 +1052,7 @@ Public Class MainForm
         AutoClock = ReadXmlKeyValue("AutoClock", -1)
         AutoListClock = ReadXmlKeyValue("AutoListClock", -1)
         ScanMax = ReadXmlKeyValue("ScanMax", "1000")
+        NoRepeat = ReadXmlKeyValue("NoRepeat", 0)
     End Sub
     Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
         Dim Res As String = DefaultValue
