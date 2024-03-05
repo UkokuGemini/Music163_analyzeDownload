@@ -1048,13 +1048,13 @@ Public Class MainForm
             LogText("正在下载歌单(ID=" & ListId & ")歌曲[" & ListFileNameStr & "](" & ListIDIndex + 1 & "/" & DailyListArr.Count & ")", False)
             If RepeatCheck(ListFileNameStr) = False Then
                 ListWebClient.DownloadFileAsync(New Uri(FileUrl & TempMInfo.ID), DownLoadPath & ListFileNameStr & ".Mp3")
+                If ListContinue Then
+                    DownloadRecommandSongSum += 1
+                End If
             Else
                 LogText("已下载过ID=" & NowDownloadListId & "的歌曲[" & FileNameStr & "].<RepeatName>")
                 ListIDIndex += 1
                 DownloadListTimer.Enabled = True
-            End If
-            If ListContinue Then
-                DownloadRecommandSongSum += 1
             End If
         ElseIf ListContinue Then
             If ListIDIndex > 0 Then
