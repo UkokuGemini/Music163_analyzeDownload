@@ -1,5 +1,6 @@
 ﻿Imports System.IO
 Imports System.Text
+Imports System.Threading
 Imports System.Xml
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
@@ -19,21 +20,7 @@ Public Class MainForm
     Dim DownLoadPath As String
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CenterToScreen()
-        LogText(Format(Now, "yyyy-MM-dd HH:mm >>"))
-        ReadXmlSetting() '//读出设置数据
-        CheckAutoRecommand() 'AutoClock
-        DownloadDirCheck() 'DownloadDir
-        LogText("*当前下载文件夹位置:" & DownLoadPath)
-        'LogText("*当前AppId:" & Api_appId)
-        'LogText("*当前accessToken:" & Api_accessToken)
-        LogText("*设置单次扫描下载上限:" & ScanMax)
-        LogText("*歌曲避免重复下载:" & NoRepeat)
-        If IO.File.Exists(RepeatPath) Then
-            RepeatArr.AddRange(IO.File.ReadAllLines(RepeatPath))
-            LogText("  --  下载记录:" & RepeatArr.Count & "条.")
-        End If
-        LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
-        LogText(">>")
+        ShowSetting()
         Me.Text = My.Application.Info.ProductName.ToString & "[Ver." & My.Application.Info.Version.ToString & "]"
         ScanWebClient = New WebClient
         RecommandWebClient = New WebClient
@@ -44,28 +31,68 @@ Public Class MainForm
         AddHandler ListWebClient.DownloadProgressChanged, AddressOf ShowListDownProgress
         AddHandler ListWebClient.DownloadFileCompleted, AddressOf ListDownloadCompleted
         ScanDelayTimer.Interval = 1000
-            FreshTimer.Interval = 60000
+        FreshTimer.Interval = 60000
         GroupBox_Log.Text = "当前扫描ID:" & ScanID
         ToolStripStatusLabel_St.Text = ""
         'Q()
     End Sub
+    Dim ReadThread As Thread
+    Sub ShowSetting()
+        LogText(">>")
+        LogText(Format(Now, "yyyy-MM-dd HH:mm >>"))
+        ReadXmlSetting() '//读出设置数据
+        CheckAutoRecommand() 'AutoClock
+        DownloadDirCheck() 'DownloadDir
+        LogText("*当前下载文件夹位置:" & DownLoadPath)
+        'LogText("*当前AppId:" & Api_appId)
+        'LogText("*当前accessToken:" & Api_accessToken)
+        LogText("*设置单次扫描下载上限:" & ScanMax)
+        LogText("*歌曲避免重复下载:" & NoRepeat)
+        If NoRepeat AndAlso IO.File.Exists(RepeatPath) Then
+            Try
+                ReadThread = New Thread(AddressOf ReadDownloaded)
+                ReadThread.Start()
+            Catch ex As Exception
+                ReadDownloaded()
+            End Try
+        End If
+        LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
+    End Sub
+    Sub ReadDownloaded()
+        RepeatArr.AddRange(IO.File.ReadAllLines(RepeatPath))
+        ToolStripMenuItem1.Text = "Downloaded:" & RepeatArr.Count
+        Try
+            ReadThread.Abort()
+        Catch ex As Exception
+        End Try
+    End Sub
     Dim TrueClose As Boolean = False
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
         If TrueClose Then
-            WriteXml("ScanId", ScanID)
-            If RepeatArr.Count > 0 Then
-                For Each Mstr As String In RepeatArr
-                    IO.File.AppendAllText(RepeatPath, Mstr & vbCrLf )
-                Next
-            End If
-            System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            AutoSave()
             NotifyIcon1.Dispose()
+            Try
+                ReadThread.Abort()
+            Catch ex As Exception
+            End Try
         Else
             e.Cancel = True
             NotifyIcon1.Visible = True
             Me.WindowState = FormWindowState.Minimized
         End If
     End Sub
+    Sub AutoSave()
+        WriteXml("ScanId", ScanID)
+        If RepeatArr.Count > 0 Then
+            Dim AllRecord As String = ""
+            For Each Mstr As String In RepeatArr
+                AllRecord &= Mstr & vbCrLf
+            Next
+            IO.File.WriteAllText(RepeatPath, AllRecord)
+        End If
+        System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+    End Sub
+
 #Region "Ui"
     Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
         Diagnostics.Process.Start("https://music.163.com/")
@@ -236,6 +263,8 @@ Public Class MainForm
             Me.TopMost = True
             Me.ShowInTaskbar = True
             NotifyIcon1.Visible = False
+            TextBox_Log.SelectionStart = TextBox_Log.Text.Length
+            TextBox_Log.ScrollToCaret()
         End If
     End Sub
 #End Region
@@ -740,6 +769,11 @@ Public Class MainForm
                     ToolStripSplitButton2_ButtonClick(Nothing, Nothing)
                 End If
             End If
+        End If
+        If Now.Minute = 0 AndAlso Now.Hour = 0 Then
+            AutoSave()
+            TextBox_Log.Text = ""
+            ShowSetting()
         End If
     End Sub
 #End Region

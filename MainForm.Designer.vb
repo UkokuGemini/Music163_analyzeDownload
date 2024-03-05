@@ -37,6 +37,9 @@ Partial Class MainForm
         Me.退出XToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.TextBox_Log = New System.Windows.Forms.TextBox()
         Me.GroupBox_Log = New System.Windows.Forms.GroupBox()
+        Me.ToolStrip2 = New System.Windows.Forms.ToolStrip()
+        Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripLabel()
+        Me.ToolStripSeparator5 = New System.Windows.Forms.ToolStripSeparator()
         Me.StatusStrip1 = New System.Windows.Forms.StatusStrip()
         Me.ToolStripProgressBar_Update = New System.Windows.Forms.ToolStripProgressBar()
         Me.ToolStripStatusLabel_UpdatePer = New System.Windows.Forms.ToolStripStatusLabel()
@@ -59,6 +62,7 @@ Partial Class MainForm
         Me.StatusStrip_St.SuspendLayout()
         Me.MenuStrip_Menu.SuspendLayout()
         Me.GroupBox_Log.SuspendLayout()
+        Me.ToolStrip2.SuspendLayout()
         Me.StatusStrip1.SuspendLayout()
         Me.ToolStrip1.SuspendLayout()
         Me.Panel_Do.SuspendLayout()
@@ -148,17 +152,18 @@ Partial Class MainForm
         Me.TextBox_Log.BackColor = System.Drawing.SystemColors.Control
         Me.TextBox_Log.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TextBox_Log.Font = New System.Drawing.Font("宋体", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
-        Me.TextBox_Log.Location = New System.Drawing.Point(3, 24)
+        Me.TextBox_Log.Location = New System.Drawing.Point(3, 52)
         Me.TextBox_Log.Multiline = True
         Me.TextBox_Log.Name = "TextBox_Log"
         Me.TextBox_Log.ReadOnly = True
         Me.TextBox_Log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.TextBox_Log.Size = New System.Drawing.Size(1160, 394)
+        Me.TextBox_Log.Size = New System.Drawing.Size(1160, 366)
         Me.TextBox_Log.TabIndex = 7
         '
         'GroupBox_Log
         '
         Me.GroupBox_Log.Controls.Add(Me.TextBox_Log)
+        Me.GroupBox_Log.Controls.Add(Me.ToolStrip2)
         Me.GroupBox_Log.Controls.Add(Me.StatusStrip1)
         Me.GroupBox_Log.Dock = System.Windows.Forms.DockStyle.Fill
         Me.GroupBox_Log.Font = New System.Drawing.Font("宋体", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
@@ -167,6 +172,31 @@ Partial Class MainForm
         Me.GroupBox_Log.Size = New System.Drawing.Size(1166, 451)
         Me.GroupBox_Log.TabIndex = 8
         Me.GroupBox_Log.TabStop = False
+        '
+        'ToolStrip2
+        '
+        Me.ToolStrip2.BackColor = System.Drawing.SystemColors.Control
+        Me.ToolStrip2.ImageScalingSize = New System.Drawing.Size(24, 24)
+        Me.ToolStrip2.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripMenuItem1, Me.ToolStripSeparator5})
+        Me.ToolStrip2.Location = New System.Drawing.Point(3, 24)
+        Me.ToolStrip2.Margin = New System.Windows.Forms.Padding(0, 5, 0, 5)
+        Me.ToolStrip2.Name = "ToolStrip2"
+        Me.ToolStrip2.Size = New System.Drawing.Size(1160, 28)
+        Me.ToolStrip2.TabIndex = 11
+        Me.ToolStrip2.Text = "ToolStrip2"
+        '
+        'ToolStripMenuItem1
+        '
+        Me.ToolStripMenuItem1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+        Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(122, 23)
+        Me.ToolStripMenuItem1.Text = "Downloaded:"
+        '
+        'ToolStripSeparator5
+        '
+        Me.ToolStripSeparator5.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
+        Me.ToolStripSeparator5.Name = "ToolStripSeparator5"
+        Me.ToolStripSeparator5.Size = New System.Drawing.Size(6, 28)
         '
         'StatusStrip1
         '
@@ -320,6 +350,8 @@ Partial Class MainForm
         Me.MenuStrip_Menu.PerformLayout()
         Me.GroupBox_Log.ResumeLayout(False)
         Me.GroupBox_Log.PerformLayout()
+        Me.ToolStrip2.ResumeLayout(False)
+        Me.ToolStrip2.PerformLayout()
         Me.StatusStrip1.ResumeLayout(False)
         Me.StatusStrip1.PerformLayout()
         Me.ToolStrip1.ResumeLayout(False)
@@ -362,4 +394,7 @@ Partial Class MainForm
     Friend WithEvents 选择下载文件夹ToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripSplitButton_ContinueList As ToolStripSplitButton
     Friend WithEvents ToolStripSeparator4 As ToolStripSeparator
+    Friend WithEvents ToolStrip2 As ToolStrip
+    Friend WithEvents ToolStripSeparator5 As ToolStripSeparator
+    Friend WithEvents ToolStripMenuItem1 As ToolStripLabel
 End Class
