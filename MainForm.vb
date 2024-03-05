@@ -48,6 +48,10 @@ Public Class MainForm
         'LogText("*当前accessToken:" & Api_accessToken)
         LogText("*设置单次扫描下载上限:" & ScanMax)
         LogText("*歌曲避免重复下载:" & NoRepeat)
+        LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
+        FreshDownloaded()
+    End Sub
+    Sub FreshDownloaded()
         If NoRepeat AndAlso IO.File.Exists(RepeatPath) Then
             Try
                 ReadThread = New Thread(AddressOf ReadDownloaded)
@@ -56,15 +60,28 @@ Public Class MainForm
                 ReadDownloaded()
             End Try
         End If
-        LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
     End Sub
     Sub ReadDownloaded()
+        RepeatArr.Clear()
         RepeatArr.AddRange(IO.File.ReadAllLines(RepeatPath))
         ToolStripMenuItem1.Text = "Downloaded:" & RepeatArr.Count
         Try
             ReadThread.Abort()
         Catch ex As Exception
         End Try
+    End Sub
+    Private Sub ToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles ToolStripMenuItem1.Click
+        ToolStripMenuItem1.Text = "Downloaded:"
+        If ReadThread.IsAlive = False Then
+            If RepeatArr.Count > 0 Then
+                Dim AllRecord As String = ""
+                For Each Mstr As String In RepeatArr
+                    AllRecord &= Mstr & vbCrLf
+                Next
+                IO.File.WriteAllText(RepeatPath, AllRecord)
+            End If
+            FreshDownloaded()
+        End If
     End Sub
     Dim TrueClose As Boolean = False
     Private Sub MainForm_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
@@ -92,7 +109,6 @@ Public Class MainForm
         End If
         System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
     End Sub
-
 #Region "Ui"
     Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
         Diagnostics.Process.Start("https://music.163.com/")
