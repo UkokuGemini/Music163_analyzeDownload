@@ -275,12 +275,12 @@ Public Class MainForm
     Private Sub NotifyIcon1_MouseClick(sender As Object, e As MouseEventArgs) Handles NotifyIcon1.MouseClick
         If e.Button = Windows.Forms.MouseButtons.Left Then
             Me.WindowState = FormWindowState.Normal
-            Me.TopMost = False
             Me.TopMost = True
             Me.ShowInTaskbar = True
             NotifyIcon1.Visible = False
             TextBox_Log.SelectionStart = TextBox_Log.Text.Length
             TextBox_Log.ScrollToCaret()
+            Me.TopMost = False
         End If
     End Sub
 #End Region
