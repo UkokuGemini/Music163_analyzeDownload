@@ -112,6 +112,19 @@ Public Class MainForm
         End If
         System.IO.File.AppendAllText(LogPath, vbCrLf & TextBox_Log.Text & vbCrLf & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
     End Sub
+    Sub Toinitial()
+        ToolStripMenuItem_ScanButton.Enabled = True
+        ToolStripSplitButton_Daily.Enabled = True
+        更改IDToolStripMenuItem.Enabled = True
+        ToolStripSplitButton_List.Enabled = True
+        ToolStripSplitButton_ContinueList.Enabled = True
+        If OnContinueScan Then
+            OnContinueScan = False
+            ToolStripMenuItem_ScanButton.Text = "停止扫描"
+            ScanDelayTimer.Enabled = True
+            ScanFlag = True
+        End If
+    End Sub
 #Region "Ui"
     Private Sub ToolStripButton1_Click(sender As Object, e As EventArgs) Handles ToolStripButton1.Click
         Diagnostics.Process.Start("https://music.163.com/")
@@ -431,19 +444,6 @@ Public Class MainForm
         GetByDiv2 = Mid(code, lgStart, lgEnd - lgStart)
     End Function
 #End Region
-    Sub Toinitial()
-        ToolStripMenuItem_ScanButton.Enabled = True
-        ToolStripSplitButton_Daily.Enabled = True
-        更改IDToolStripMenuItem.Enabled = True
-        ToolStripSplitButton_List.Enabled = True
-        ToolStripSplitButton_ContinueList.Enabled = True
-        If OnContinueScan Then
-            OnContinueScan = False
-            ToolStripMenuItem_ScanButton.Text = "停止扫描"
-            ScanDelayTimer.Enabled = True
-            ScanFlag = True
-        End If
-    End Sub
 #Region "ID削刮"
     Public Structure MInfo
         Dim Name As String
@@ -481,6 +481,7 @@ Public Class MainForm
                 LogText("正在下载: 歌曲[" & FileNameStr & "](ID=" & ID & ")", False)
                 If System.IO.File.Exists(DownLoadPath & FileNameStr & ".Mp3") Then
                     LogText("已存在: 歌曲[" & FileNameStr & "](ID=" & ID & ")")
+                    RepeatCheck(FileNameStr)
                     SuccessDownloadKey = NowDownloadKey
                     NextID(ScanGetType)
                 Else
