@@ -263,7 +263,7 @@ Public Class MainForm
         ToolStripProgressBar_Update.Size = New Size(Me.Size.Width - 250, 20)
     End Sub
     Sub LogText(ByVal LogStr As String, Optional LogFlag As Boolean = True)
-        ToolStripStatusLabel_St.Text = LogStr
+        ToolStripStatusLabel_St.Text = Replace(LogStr, vbCrLf, "")
         If LogFlag Then
             TextBox_Log.Text &= LogStr & vbCrLf
             TextBox_Log.SelectionStart = TextBox_Log.Text.Length
