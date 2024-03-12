@@ -1117,6 +1117,7 @@ Public Class MainForm
 "<NoRepeat>0</NoRepeat>" & vbCrLf &
 "<AutoAlbum>0</AutoAlbum>" & vbCrLf &
 "<AlbumLimit>5</AlbumLimit>" & vbCrLf &
+"<CleanSmallKb>150</CleanSmallKb>" & vbCrLf &
 "</Music163_analyzeDownload_Setting>"
     Sub ReadXmlSetting()
         If System.IO.File.Exists(XmlSettingPath) = False Then
@@ -1130,6 +1131,8 @@ Public Class MainForm
         NoRepeat = ReadXmlKeyValue("NoRepeat", 0)
         AutoAlbum = ReadXmlKeyValue("AutoAlbum", 0)
         AlbumLimitNum = ReadXmlKeyValue("AlbumLimit", 5)
+        SmallKb = ReadXmlKeyValue("CleanSmallKb", 150)
+        清理无效音频ToolStripMenuItem.Text = "清理小音频<" & SmallKb & "Kb"
     End Sub
     Dim AutoAlbum As Boolean
     Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
@@ -1256,6 +1259,10 @@ Public Class MainForm
         ToolStripLabel_AlbumNum.Text = "【关联专辑】.已解析歌曲:" & AlbumArr.Count
         Return Res
     End Function
+
+    Private Sub 清理无效音频ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 清理无效音频ToolStripMenuItem.Click
+        Clean()
+    End Sub
     Dim AlbumSeccessNum As Integer
     Sub GoAlbum()
         If AlbumArr.Count > 0 AndAlso AutoAlbum Then
@@ -1315,6 +1322,22 @@ Public Class MainForm
             ToolStripLabel_Album.Text = "尝试下载专辑❌"
         End If
         ToolStripLabel_AlbumNum.Visible = AutoAlbum
+    End Sub
+#End Region
+#Region "Clean"
+    Dim SmallKb As Int64
+    Sub Clean()
+        Dim DelectSmallSum As Integer = 0
+        On Error Resume Next
+        Dim DirectoryInfos As New DirectoryInfo(DownLoadPath)
+        Dim GetFiles As FileInfo() = DirectoryInfos.GetFiles("*")
+        For Each FileInfos As FileInfo In GetFiles
+            If FileInfos.Length < SmallKb * 8192 Then
+                IO.File.Delete(FileInfos.FullName)
+                DelectSmallSum += 1
+            End If
+        Next
+        LogText(vbCrLf & "【清理小音频】(<" & SmallKb & "kb)共:" & DelectSmallSum & vbCrLf)
     End Sub
 #End Region
 End Class

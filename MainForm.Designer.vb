@@ -62,6 +62,7 @@ Partial Class MainForm
         Me.ToolStripLabel_Album = New System.Windows.Forms.ToolStripLabel()
         Me.Panel_Do = New System.Windows.Forms.Panel()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
+        Me.清理无效音频ToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.StatusStrip_St.SuspendLayout()
         Me.MenuStrip_Menu.SuspendLayout()
         Me.GroupBox_Log.SuspendLayout()
@@ -77,7 +78,7 @@ Partial Class MainForm
         Me.StatusStrip_St.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripStatusLabel_St})
         Me.StatusStrip_St.Location = New System.Drawing.Point(0, 519)
         Me.StatusStrip_St.Name = "StatusStrip_St"
-        Me.StatusStrip_St.Size = New System.Drawing.Size(1166, 30)
+        Me.StatusStrip_St.Size = New System.Drawing.Size(1078, 30)
         Me.StatusStrip_St.TabIndex = 2
         Me.StatusStrip_St.Text = "StatusStrip1"
         '
@@ -92,10 +93,10 @@ Partial Class MainForm
         Me.MenuStrip_Menu.BackColor = System.Drawing.SystemColors.Control
         Me.MenuStrip_Menu.GripMargin = New System.Windows.Forms.Padding(2, 2, 0, 2)
         Me.MenuStrip_Menu.ImageScalingSize = New System.Drawing.Size(24, 24)
-        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.ToolStripButton1, Me.选择下载文件夹ToolStripMenuItem, Me.退出XToolStripMenuItem, Me.设置文件配置ToolStripMenuItem})
+        Me.MenuStrip_Menu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.打开目录ToolStripMenuItem, Me.选择下载文件夹ToolStripMenuItem, Me.清理无效音频ToolStripMenuItem, Me.设置开机启动ToolStripMenuItem, Me.ToolStripButton1, Me.设置文件配置ToolStripMenuItem, Me.退出XToolStripMenuItem})
         Me.MenuStrip_Menu.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip_Menu.Name = "MenuStrip_Menu"
-        Me.MenuStrip_Menu.Size = New System.Drawing.Size(1166, 36)
+        Me.MenuStrip_Menu.Size = New System.Drawing.Size(1078, 36)
         Me.MenuStrip_Menu.TabIndex = 4
         Me.MenuStrip_Menu.Text = "MenuStrip1"
         '
@@ -155,12 +156,12 @@ Partial Class MainForm
         Me.TextBox_Log.BackColor = System.Drawing.SystemColors.Control
         Me.TextBox_Log.Dock = System.Windows.Forms.DockStyle.Fill
         Me.TextBox_Log.Font = New System.Drawing.Font("宋体", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
-        Me.TextBox_Log.Location = New System.Drawing.Point(3, 62)
+        Me.TextBox_Log.Location = New System.Drawing.Point(3, 52)
         Me.TextBox_Log.Multiline = True
         Me.TextBox_Log.Name = "TextBox_Log"
         Me.TextBox_Log.ReadOnly = True
         Me.TextBox_Log.ScrollBars = System.Windows.Forms.ScrollBars.Vertical
-        Me.TextBox_Log.Size = New System.Drawing.Size(1160, 356)
+        Me.TextBox_Log.Size = New System.Drawing.Size(1072, 366)
         Me.TextBox_Log.TabIndex = 7
         '
         'GroupBox_Log
@@ -172,7 +173,7 @@ Partial Class MainForm
         Me.GroupBox_Log.Font = New System.Drawing.Font("宋体", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
         Me.GroupBox_Log.Location = New System.Drawing.Point(0, 68)
         Me.GroupBox_Log.Name = "GroupBox_Log"
-        Me.GroupBox_Log.Size = New System.Drawing.Size(1166, 451)
+        Me.GroupBox_Log.Size = New System.Drawing.Size(1078, 451)
         Me.GroupBox_Log.TabIndex = 8
         Me.GroupBox_Log.TabStop = False
         '
@@ -184,7 +185,7 @@ Partial Class MainForm
         Me.ToolStrip2.Location = New System.Drawing.Point(3, 24)
         Me.ToolStrip2.Margin = New System.Windows.Forms.Padding(0, 5, 0, 5)
         Me.ToolStrip2.Name = "ToolStrip2"
-        Me.ToolStrip2.Size = New System.Drawing.Size(1160, 38)
+        Me.ToolStrip2.Size = New System.Drawing.Size(1072, 28)
         Me.ToolStrip2.TabIndex = 11
         Me.ToolStrip2.Text = "ToolStrip2"
         '
@@ -192,26 +193,26 @@ Partial Class MainForm
         '
         Me.ToolStripMenuItem1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
         Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(122, 33)
+        Me.ToolStripMenuItem1.Size = New System.Drawing.Size(122, 23)
         Me.ToolStripMenuItem1.Text = "Downloaded:"
         '
         'ToolStripSeparator5
         '
         Me.ToolStripSeparator5.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
         Me.ToolStripSeparator5.Name = "ToolStripSeparator5"
-        Me.ToolStripSeparator5.Size = New System.Drawing.Size(6, 38)
+        Me.ToolStripSeparator5.Size = New System.Drawing.Size(6, 28)
         '
         'ToolStripLabel_AlbumNum
         '
         Me.ToolStripLabel_AlbumNum.Name = "ToolStripLabel_AlbumNum"
-        Me.ToolStripLabel_AlbumNum.Size = New System.Drawing.Size(216, 33)
+        Me.ToolStripLabel_AlbumNum.Size = New System.Drawing.Size(216, 23)
         Me.ToolStripLabel_AlbumNum.Text = "【关联专辑】.已解析歌曲:"
         Me.ToolStripLabel_AlbumNum.Visible = False
         '
         'ToolStripSeparator6
         '
         Me.ToolStripSeparator6.Name = "ToolStripSeparator6"
-        Me.ToolStripSeparator6.Size = New System.Drawing.Size(6, 38)
+        Me.ToolStripSeparator6.Size = New System.Drawing.Size(6, 28)
         '
         'StatusStrip1
         '
@@ -219,7 +220,7 @@ Partial Class MainForm
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolStripProgressBar_Update, Me.ToolStripStatusLabel_UpdatePer, Me.ToolStripStatusLabel1})
         Me.StatusStrip1.Location = New System.Drawing.Point(3, 418)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(1160, 30)
+        Me.StatusStrip1.Size = New System.Drawing.Size(1072, 30)
         Me.StatusStrip1.TabIndex = 10
         Me.StatusStrip1.Text = "StatusStrip1"
         '
@@ -254,7 +255,7 @@ Partial Class MainForm
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 0)
         Me.ToolStrip1.Margin = New System.Windows.Forms.Padding(0, 5, 0, 5)
         Me.ToolStrip1.Name = "ToolStrip1"
-        Me.ToolStrip1.Size = New System.Drawing.Size(1166, 32)
+        Me.ToolStrip1.Size = New System.Drawing.Size(1078, 32)
         Me.ToolStrip1.TabIndex = 9
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -276,7 +277,7 @@ Partial Class MainForm
         Me.更改IDToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right
         Me.更改IDToolStripMenuItem.Name = "更改IDToolStripMenuItem"
         Me.更改IDToolStripMenuItem.Size = New System.Drawing.Size(81, 32)
-        Me.更改IDToolStripMenuItem.Text = "更改ID"
+        Me.更改IDToolStripMenuItem.Text = "ID跳转"
         '
         'ToolStripTextBox_Changeid
         '
@@ -349,21 +350,27 @@ Partial Class MainForm
         Me.Panel_Do.MaximumSize = New System.Drawing.Size(0, 40)
         Me.Panel_Do.MinimumSize = New System.Drawing.Size(0, 30)
         Me.Panel_Do.Name = "Panel_Do"
-        Me.Panel_Do.Size = New System.Drawing.Size(1166, 32)
+        Me.Panel_Do.Size = New System.Drawing.Size(1078, 32)
         Me.Panel_Do.TabIndex = 10
+        '
+        '清理无效音频ToolStripMenuItem
+        '
+        Me.清理无效音频ToolStripMenuItem.Name = "清理无效音频ToolStripMenuItem"
+        Me.清理无效音频ToolStripMenuItem.Size = New System.Drawing.Size(116, 32)
+        Me.清理无效音频ToolStripMenuItem.Text = "清理小音频"
         '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(9.0!, 18.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1166, 549)
+        Me.ClientSize = New System.Drawing.Size(1078, 549)
         Me.Controls.Add(Me.GroupBox_Log)
         Me.Controls.Add(Me.Panel_Do)
         Me.Controls.Add(Me.StatusStrip_St)
         Me.Controls.Add(Me.MenuStrip_Menu)
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MainMenuStrip = Me.MenuStrip_Menu
-        Me.MinimumSize = New System.Drawing.Size(750, 600)
+        Me.MinimumSize = New System.Drawing.Size(1100, 600)
         Me.Name = "MainForm"
         Me.StatusStrip_St.ResumeLayout(False)
         Me.StatusStrip_St.PerformLayout()
@@ -421,4 +428,5 @@ Partial Class MainForm
     Friend WithEvents ToolStripLabel_Album As ToolStripLabel
     Friend WithEvents ToolStripLabel_AlbumNum As ToolStripLabel
     Friend WithEvents ToolStripSeparator6 As ToolStripSeparator
+    Friend WithEvents 清理无效音频ToolStripMenuItem As ToolStripMenuItem
 End Class
