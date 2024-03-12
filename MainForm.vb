@@ -7,7 +7,7 @@ Imports Newtonsoft.Json.Linq
 
 Public Class MainForm
     Dim ScanID As Integer = 0
-    Dim AutoClock As Integer = -1
+    Dim AutoDailyClock As Integer = -1
     Dim AutoListClock As Integer = -1
     ReadOnly WebUrl As String = "https://music.163.com/#/song?id="
     ReadOnly FileUrl As String = "http://music.163.com/song/media/outer/url?id="
@@ -42,7 +42,7 @@ Public Class MainForm
         LogText(">>")
         LogText(Format(Now, "yyyy-MM-dd HH:mm >>"))
         ReadXmlSetting() '//读出设置数据
-        CheckAutoRecommand() 'AutoClock
+        CheckAutoRecommand() 'AutoDailyClock
         DownloadDirCheck() 'DownloadDir
         LogText("*当前下载文件夹位置:" & DownLoadPath)
         'LogText("*当前AppId:" & Api_appId)
@@ -572,7 +572,7 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "每日歌曲"
-    ReadOnly Api_Daily As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A100%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
+    ReadOnly Api_Daily As String = "http://openapi.music.163.com/openapi/music/basic/recommend/songlist/get/v2?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A<*>%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
     Dim DailyNameArr As New ArrayList
     Dim DailyIDArr As New ArrayList
     Dim SingleListArr As New ArrayList
@@ -581,7 +581,7 @@ Public Class MainForm
         NowDownloadKey = ""
         DailyNameArr.Clear()
         DailyIDArr.Clear()
-        Dim Api_Daily_Now As String = Api_Daily & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
+        Dim Api_Daily_Now As String = Replace(Api_Daily, "<*>", DailyMax) & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
         Dim UrlCode As String = GetWebCode(Api_Daily_Now)
         Dim JsonObj_Code As New With {.code = ""}
         Try
@@ -775,16 +775,16 @@ Public Class MainForm
     Private WithEvents FreshTimer As New System.Windows.Forms.Timer
     Sub CheckAutoRecommand()
         Dim EnableFresh As Boolean = False
-        If AutoClock > -1 AndAlso AutoClock < 24 Then
+        If AutoDailyClock > -1 AndAlso AutoDailyClock < 24 Then
             EnableFresh = True
-            LogText("*已开启自动下载【每日歌曲】.@" & AutoClock & ":00")
+            LogText("*已开启自动下载【每日歌曲】(" & DailyMax & "首).@" & AutoDailyClock & ":00")
         Else
-            AutoClock = -1
+            AutoDailyClock = -1
             LogText("*未开启自动下载【每日歌曲】.")
         End If
         If AutoListClock > -1 AndAlso AutoListClock < 24 Then
             EnableFresh = True
-            LogText("*已开启自动下载【随机歌单】.@" & AutoListClock & ":00")
+            LogText("*已开启自动下载【随机歌单】(" & ListMax & "个).@" & AutoListClock & ":00")
         Else
             AutoListClock = -1
             LogText("*未开启自动下载【随机歌单】.")
@@ -794,7 +794,7 @@ Public Class MainForm
         End If
     End Sub
     Private Sub FreshTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FreshTimer.Tick
-        If AutoClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoClock AndAlso Now.Date > FreshDate.Date Then
+        If AutoDailyClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoDailyClock AndAlso Now.Date > FreshDate.Date Then
             FreshDate = Now.Date '//防止不断触发
             If DailyFlag = False Then
                 ToolStripSplitButton_Recommand_ButtonClick(Nothing, Nothing)
@@ -821,7 +821,7 @@ Public Class MainForm
     End Sub
 #End Region
 #Region "随机歌单"
-    ReadOnly RecommendListUrl As String = "https://openapi.music.163.com/openapi/music/basic/recommend/playlist/get?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A10%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
+    ReadOnly RecommendListUrl As String = "https://openapi.music.163.com/openapi/music/basic/recommend/playlist/get?appId=a301010000000000aadb4e5a28b45a67&bizContent=%7B%22limit%22%3A<*>%7D&signType=RSA_SHA256&accessToken=x46c13d33a898ad1d257c5009a1daadfced5a1160176c2309y&device=%7B%22deviceType%22%3A%22andrwear%22%2C%22os%22%3A%22andrwear%22%2C%22appVer%22%3A%220.1%22%2C%22channel%22%3A%22hm%22%2C%22model%22%3A%22kys%22%2C%22deviceId%22%3A%22321%22%2C%22brand%22%3A%22hm%22%2C%22osVer%22%3A%228.1.0%22%7D&timestamp="
     ReadOnly RecommendListSearchUrl As String = "https://music.163.com/api/search/get/web?csrf_token=hlpretag=&hlposttag=&s={<*>}&type=1000&offset=0&total=true&limit=20"
     Dim RecommandSingleListArr As New ArrayList
     Dim RecommandDownloadIdArr As New ArrayList
@@ -847,7 +847,7 @@ Public Class MainForm
         DownloadRecommandListSum = 0
         RecommandSingleListArr.Clear()
         Delay_Plus_List = 0
-        Dim Api_Daily_Now As String = RecommendListUrl & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
+        Dim Api_Daily_Now As String = Replace(RecommendListUrl, "<*>", ListMax) & DateTimeOffset.UtcNow.ToUnixTimeSeconds.ToString & "000"
         Dim UrlCode As String = GetWebCode(Api_Daily_Now)
         Dim JsonObj_Code As New With {.code = ""}
         Try
@@ -1113,8 +1113,10 @@ Public Class MainForm
 "<DownloadDir>" & TargetPath & "</DownloadDir>" & vbCrLf &
 "<ScanId>0</ScanId>" & vbCrLf &
 "<ScanMax>500</ScanMax>" & vbCrLf &
-"<AutoClock>-1</AutoClock>" & vbCrLf &
+"<AutoDailyClock>-1</AutoDailyClock>" & vbCrLf &
+"<DailyMax>50</DailyMax>" & vbCrLf &
 "<AutoListClock>-1</AutoListClock>" & vbCrLf &
+"<ListMax>10</ListMax>" & vbCrLf &
 "<NoRepeat>0</NoRepeat>" & vbCrLf &
 "<AutoAlbum>0</AutoAlbum>" & vbCrLf &
 "<AlbumLimit>5</AlbumLimit>" & vbCrLf &
@@ -1126,8 +1128,10 @@ Public Class MainForm
         End If
         ScanID = ReadXmlKeyValue("ScanId", 0)
         DownLoadPath = ReadXmlKeyValue("DownloadDir", TargetPath)
-        AutoClock = ReadXmlKeyValue("AutoClock", -1)
+        AutoDailyClock = ReadXmlKeyValue("AutoDailyClock", -1)
+        DailyMax = Math.Max(1, Convert.ToInt32(ReadXmlKeyValue("DailyMax", 50)))
         AutoListClock = ReadXmlKeyValue("AutoListClock", -1)
+        ListMax = Math.Max(1, Convert.ToInt32(ReadXmlKeyValue("ListMax", 10)))
         ScanMax = ReadXmlKeyValue("ScanMax", "1000")
         NoRepeat = ReadXmlKeyValue("NoRepeat", 0)
         AutoAlbum = ReadXmlKeyValue("AutoAlbum", 0)
@@ -1136,6 +1140,7 @@ Public Class MainForm
         清理无效音频ToolStripMenuItem.Text = "清理小音频<" & SmallKb & "Kb"
     End Sub
     Dim AutoAlbum As Boolean
+    Dim DailyMax, ListMax As Integer
     Function ReadXmlKeyValue(ByVal QurStr As String, ByVal DefaultValue As String) As String
         Dim Res As String = DefaultValue
         Try
