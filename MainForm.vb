@@ -1316,7 +1316,7 @@ Public Class MainForm
                 AlbumArr.Clear()
             ToolStripLabel_AlbumNum.Text = "【关联专辑】.已解析歌曲:"
             ToolStripTextBox_ListId.Text = ""
-            LogText(vbCrLf & " -- 【关联专辑】下载结束!总计下载:" & AlbumSeccessNum & "首.")
+            LogText(vbCrLf & " -- 【关联专辑】下载结束!总计下载:" & AlbumSeccessNum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             Toinitial()
         End If
     End Sub
