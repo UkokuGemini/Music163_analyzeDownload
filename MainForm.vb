@@ -165,10 +165,15 @@ Public Class MainForm
                 System.IO.Directory.CreateDirectory(FloderPath)
             Catch ex As Exception
                 FloderPath = TargetPath
+                LogText("下载文件夹:" & DownLoadPath & "修改失败,还原默认设置:" & TargetPath)
             End Try
         End If
         DownLoadPath = FloderPath
-        WriteXml("DownloadDir", DownLoadPath)
+        If WriteXml("DownloadDir", DownLoadPath) Then
+            LogText("已更改下载文件夹:" & DownLoadPath)
+        Else
+            LogText("下载文件夹:" & DownLoadPath & "保存设置失败.请手动修改.")
+        End If
     End Sub
     Sub DownloadDirCheck()
         If Strings.Mid(DownLoadPath, DownLoadPath.Length, 1) <> "\" Then
@@ -1151,7 +1156,7 @@ Public Class MainForm
         End Try
         Return Res
     End Function
-    Sub WriteXml(ByVal NameStr As String, ByVal Value As String)
+    Function WriteXml(ByVal NameStr As String, ByVal Value As String) As Boolean
         Dim SuccesFlag As Boolean = False
         Dim xmlDoc As New XmlDocument()
         xmlDoc.Load(XmlSettingPath)
@@ -1185,11 +1190,9 @@ Public Class MainForm
         End Try
         If SuccesFlag Then
             xmlDoc.Save(XmlSettingPath)
-            LogText("已更改下载文件夹:" & Value)
-        Else
-            LogText("下载文件夹:" & Value & "修改失败,请在配置文件中手动修改.")
         End If
-    End Sub
+        Return SuccesFlag
+    End Function
 #End Region
 #Region "Album"
     Dim AlbumArr As New ArrayList
