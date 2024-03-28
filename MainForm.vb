@@ -639,18 +639,8 @@ Public Class MainForm
             DailyFlag = False
             RecommandStep = 0
             DailyIDArr.Clear()
-            ToolStripSplitButton_Daily.Enabled = True
-            ToolStripMenuItem_ScanButton.Enabled = True
-            更改IDToolStripMenuItem.Enabled = True
-            ToolStripSplitButton_List.Enabled = True
-            ToolStripSplitButton_ContinueList.Enabled = True
-            If OnContinueScan Then
-                OnContinueScan = False
-                ToolStripMenuItem_ScanButton.Text = "停止扫描"
-                ScanDelayTimer.Enabled = True
-                ScanFlag = True
-            End If
-            LogText("【每日歌单】:获取失败." & JsonObj_Code.code)
+            Toinitial()
+            LogText("【每日歌单】:获取失败." & JsonObj_Code.code & "  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
         End If
     End Sub
     Private WithEvents GetDailyIDTimer As New System.Windows.Forms.Timer
@@ -880,6 +870,11 @@ Public Class MainForm
                 GetRecommandListIDTimer.Interval = 1000
                 GetRecommandListIDTimer.Enabled = True
             End If
+        Else
+            ToolStripSplitButton_ContinueList.Text = "随机歌单"
+            LogText(vbCrLf & "【随机歌单】.解析失败.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
+            RecommandListFlag = False
+            Toinitial()
         End If
     End Sub
     Private WithEvents GetRecommandListIDTimer As New System.Windows.Forms.Timer
@@ -1268,7 +1263,6 @@ Public Class MainForm
         ToolStripLabel_AlbumNum.Text = "【关联专辑】.已解析歌曲:" & AlbumArr.Count
         Return Res
     End Function
-
     Private Sub 清理无效音频ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles 清理无效音频ToolStripMenuItem.Click
         Clean()
     End Sub
