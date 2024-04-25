@@ -1084,7 +1084,7 @@ Public Class MainForm
                     DownloadRecommandSongSum += 1
                 End If
             Else
-                LogText("已下载过歌曲[" & FileNameStr & "](ID=" & NowDownloadListId & ").")
+                LogText("已下载过歌曲[" & ListFileNameStr & "](ID=" & NowDownloadListId & ").")
                 ListIDIndex += 1
                 DownloadListTimer.Enabled = True
             End If
