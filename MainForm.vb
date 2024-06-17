@@ -17,7 +17,7 @@ Public Class MainForm
     ReadOnly LogPath As String = Directory.GetCurrentDirectory & "\ScanLog.Log"
     ReadOnly XmlSettingPath As String = Directory.GetCurrentDirectory & "\Music163_analyzeDownload_Setting.Xml"
     ReadOnly RepeatPath As String = Directory.GetCurrentDirectory & "\RepeatName.ini"
-    Dim DownLoadPath As String
+    Dim DownLoadPath, StorePath As String
     Private Sub MainForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.CenterToScreen()
         ShowSetting()
@@ -45,11 +45,16 @@ Public Class MainForm
         CheckAutoRecommand() 'AutoDailyClock
         DownloadDirCheck() 'DownloadDir
         LogText("*当前下载文件夹位置:" & DownLoadPath)
+        LogText("*下载文件夹歌曲数目:" & CulNum(DownLoadPath))
         'LogText("*当前AppId:" & Api_appId)
         'LogText("*当前accessToken:" & Api_accessToken)
         LogText("*设置单次扫描下载上限:" & ScanMax)
         LogText("*歌曲避免重复下载:" & NoRepeat)
         LogText("*上次扫描到歌曲(ID=" & ScanID & ")")
+        If IO.Directory.Exists(StorePath) Then
+            LogText("*自定义存储文件夹位置: " & StorePath)
+            LogText("*自定义存储文件夹歌曲数目:" & CulNum(StorePath))
+        End If
         FreshDownloaded()
         LogText("")
     End Sub
@@ -1111,6 +1116,7 @@ Public Class MainForm
     ReadOnly InitialXmlSettingStr As String = "<?xml version=" & Chr(34) & "1.0" & Chr(34) & "?>" & vbCrLf &
 "<Music163_analyzeDownload_Setting> " & vbCrLf &
 "<DownloadDir>" & TargetPath & "</DownloadDir>" & vbCrLf &
+"<StoreDir>" & TargetPath & "</StoreDir>" & vbCrLf &
 "<ScanId>0</ScanId>" & vbCrLf &
 "<ScanMax>500</ScanMax>" & vbCrLf &
 "<AutoDailyClock>-1</AutoDailyClock>" & vbCrLf &
@@ -1128,6 +1134,7 @@ Public Class MainForm
         End If
         ScanID = ReadXmlKeyValue("ScanId", 0)
         DownLoadPath = ReadXmlKeyValue("DownloadDir", TargetPath)
+        StorePath = ReadXmlKeyValue("StoreDir", TargetPath)
         AutoDailyClock = ReadXmlKeyValue("AutoDailyClock", -1)
         DailyMax = Math.Max(1, Convert.ToInt32(ReadXmlKeyValue("DailyMax", 50)))
         AutoListClock = ReadXmlKeyValue("AutoListClock", -1)
@@ -1341,6 +1348,28 @@ Public Class MainForm
             End If
         Next
         LogText(vbCrLf & "【清理小音频】(<" & SmallKb & "kb)共:" & DelectSmallSum & vbCrLf)
+    End Sub
+#End Region
+#Region "CulNum"
+    Dim DirNum As Integer = 0
+    Function CulNum(ByVal DirPath As String) As Integer
+        DirNum = 0
+        AddDirFiles(DirPath)
+        Return DirNum
+    End Function
+    Public Sub AddDirFiles(ByVal DirPath As String)
+        On Error Resume Next
+        Dim DirectoryInfos As New DirectoryInfo(DirPath)
+        Dim GetFiles As FileInfo() = DirectoryInfos.GetFiles("*")
+        For Each FileInfos As FileInfo In GetFiles
+            If FileInfos.Extension = ".Mp3" Then
+                DirNum += 1
+            End If
+        Next
+        Dim DirectoryInfos_This As DirectoryInfo() = DirectoryInfos.GetDirectories()
+        For Each item As DirectoryInfo In DirectoryInfos_This
+            AddDirFiles(item.FullName)
+        Next
     End Sub
 #End Region
 End Class
