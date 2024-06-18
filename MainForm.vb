@@ -1362,7 +1362,7 @@ Public Class MainForm
         Dim DirectoryInfos As New DirectoryInfo(DirPath)
         Dim GetFiles As FileInfo() = DirectoryInfos.GetFiles("*")
         For Each FileInfos As FileInfo In GetFiles
-            If FileInfos.Extension.ToUpper = ".MP3" Then
+            If FileInfos.Extension.ToUpper = ".MP3" OrElse FileInfos.Extension.ToUpper = ".M4A" OrElse FileInfos.Extension.ToUpper = ".FLAC" OrElse FileInfos.Extension.ToUpper = ".WMA" OrElse FileInfos.Extension.ToUpper = ".WAV" OrElse FileInfos.Extension.ToUpper = ".AAC" Then
                 DirNum += 1
             End If
         Next
