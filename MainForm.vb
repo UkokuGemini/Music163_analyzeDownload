@@ -1362,7 +1362,7 @@ Public Class MainForm
         Dim DirectoryInfos As New DirectoryInfo(DirPath)
         Dim GetFiles As FileInfo() = DirectoryInfos.GetFiles("*")
         For Each FileInfos As FileInfo In GetFiles
-            If FileInfos.Extension = ".Mp3" Then
+            If FileInfos.Extension.ToUpper = ".MP3" Then
                 DirNum += 1
             End If
         Next
