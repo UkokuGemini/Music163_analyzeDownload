@@ -123,6 +123,7 @@ Public Class MainForm
         更改IDToolStripMenuItem.Enabled = True
         ToolStripSplitButton_List.Enabled = True
         ToolStripSplitButton_ContinueList.Enabled = True
+        ListFlag = False
         If OnContinueScan Then
             OnContinueScan = False
             ToolStripMenuItem_ScanButton.Text = "停止扫描"
