@@ -572,6 +572,7 @@ Public Class MainForm
     Private Sub ScanDelayTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ScanDelayTimer.Tick
         ScanDelayTimer.Enabled = False
         ScanDelayTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
+        ShowDelay(ScanDelayTimer.Interval)
         If ScanIndex >= Int(ScanMax) Then
             LogText("【歌曲扫描】.已达到单次扫描下载上限:" & ScanMax)
             ToolStripMenuItem_Scan_Click(Nothing, Nothing)
@@ -732,6 +733,7 @@ Public Class MainForm
             End If
             Delay_Plus = Math.Min(1800000, Delay_Plus)
             GetDailyIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000 + Delay_Plus
+            ShowDelay(GetDailyIDTimer.Interval)
         Else
             GetDaily_ID_Index += 1
             GetDailyIDTimer.Interval = 1000 + Math.Round(Rnd(), 1) * 2000
@@ -794,6 +796,7 @@ Public Class MainForm
         End If
     End Sub
     Private Sub FreshTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles FreshTimer.Tick
+
         If AutoDailyClock > -1 AndAlso Now.Minute = 0 AndAlso Now.Hour = AutoDailyClock AndAlso Now.Date > FreshDate.Date Then
             FreshDate = Now.Date '//防止不断触发
             If DailyFlag = False Then
@@ -919,6 +922,7 @@ Public Class MainForm
                 If JsonObj_Code.code = "406" OrElse JsonObj_Code.code = "405" OrElse JsonObj_Code.code = "-447" Then
                     Delay_Plus_List += 1
                     GetRecommandListIDTimer.Interval = 1000 + Delay_Plus_List * 5000
+                    ShowDelay(GetRecommandListIDTimer.Interval)
                     LogText("(" & SearchListIDInsex & "/" & RecommandSingleListArr.Count & ").歌单搜索延迟(" & Int(GetRecommandListIDTimer.Interval / 1000) & "秒)", False)
                 End If
                 Dim JsonObj_err As New With {.Msg = ""}
@@ -960,7 +964,7 @@ Public Class MainForm
             End If
             RecommandListFlag = False
             ToolStripSplitButton_ContinueList.Text = "随机歌单"
-            ToolStripTextBox_ListId.Text = ""
+            'ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             StopFlag_ContinueList = 0
             GoAlbum()
@@ -1079,6 +1083,7 @@ Public Class MainForm
                     ErrReTry = 0
                     If GetAlbum(TempMInfo.AlbumID, TempMInfo.ID) Then
                         DownloadListTimer.Interval = 20000 + Math.Round(Rnd(), 1) * 2000
+                        ShowDelay(DownloadListTimer.Interval)
                     End If
                 Catch ex As Exception
                 End Try
@@ -1101,11 +1106,12 @@ Public Class MainForm
             DownloadRecommandListIndex += 1
             If ListContinueSuccesFlag = False Then
                 DownloadRecommandListTimer.Interval = 1000 + 60000 * Delay_Plus_ContinueList
+                ShowDelay(DownloadRecommandListTimer.Interval)
             End If
             DownloadRecommandListTimer.Enabled = True
         Else
             DownloadListTimer.Interval = 1000
-            ToolStripTextBox_ListId.Text = ""
+            'ToolStripTextBox_ListId.Text = ""
             StopFlag_DownloadListTimer = 0
             LogText(" -- 歌单(ID=" & ListId & ")下载结束!总计下载:" & ListIDIndex & "首.")
             GoAlbum()
@@ -1319,7 +1325,7 @@ Public Class MainForm
             Else
                 AlbumArr.Clear()
             ToolStripLabel_AlbumNum.Text = "【关联专辑】.已解析歌曲:"
-            ToolStripTextBox_ListId.Text = ""
+            'ToolStripTextBox_ListId.Text = ""
             LogText(vbCrLf & " -- 【关联专辑】下载结束!总计下载:" & AlbumSeccessNum & "首.  --  " & Format(Now, "yyyy-MM-dd HH:mm"))
             Toinitial()
         End If
@@ -1372,4 +1378,40 @@ Public Class MainForm
         Next
     End Sub
 #End Region
+    Private WithEvents DelayDisplayTimer As New System.Windows.Forms.Timer
+    Dim DelayDisplayTimerIndex As Integer
+    Private Sub DelayDisplayTimer_Tick(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles DelayDisplayTimer.Tick
+        DelayDisplayTimer.Interval = 1000
+        DelayDisplayTimerIndex -= 1
+        If DelayDisplayTimerIndex <= 0 Then
+            DelayDisplayTimer.Enabled = False
+            ToolStripStatusLabel_DelayDisplay.Text = ""
+        Else
+            ToolStripStatusLabel_DelayDisplay.Text = "[搜索倒计时:" & CulCulateLastTimeText(DelayDisplayTimerIndex) & "]"
+        End If
+    End Sub
+    Sub ShowDelay(ByVal Interval_Delay As Int64)
+        DelayDisplayTimerIndex = Int(Interval_Delay / 1000)
+        DelayDisplayTimer.Enabled = True
+    End Sub
+    Public Function CulCulateLastTimeText(ByVal Time As Int64) As String
+        Dim H, M, S As Int64
+        Dim HT As String = ""
+        Dim MT As String = ""
+        Dim ST As String = ""
+        H = Int(Time / 3600)
+        Time = Time Mod 3600
+        M = Int(Time / 60)
+        S = Time Mod 60
+        If H > 0 Then
+            HT = H & "小时"
+        End If
+        If M > 0 Then
+            MT = M & "分"
+        End If
+        If S > 0 Then
+            ST = S & "秒"
+        End If
+        Return HT & MT & ST
+    End Function '显示时间
 End Class
